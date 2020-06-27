@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "rootDir": "./",
+    "outDir": "./built",
+    "baseUrl": "./",
+    "allowJs": true,
+    "checkJs": true,
+    "alwaysStrict": true,
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noEmitOnError": false,
+    "sourceMap": true,
+    "lib": ["ES2015", "ES2016", "ES2017", "ESNext"]
+  },
+  "include": ["lib/**/*", "test/**/*"],
+  "exclude": ["node_modules"]
+}

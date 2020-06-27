@@ -1,0 +1,10 @@
+name: kconmon
+# Do not change this line, it gets set by GoCD
+version: 0.1.0
+description: A project for testing & monitor kubernetes nodes with TCP and UDP
+keywords:
+home:
+sources:
+  - https://github.com/Stono/kconmon
+engine: gotpl
+deprecated: false

@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+{{ include "kconmon.app.labels.standard" . | indent 4 }}
+  name: controller
+spec:
+  minReadySeconds: 15
+  replicas: 2
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: kconmon
+      component: controller
+  strategy:
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        atcloud.io/serviceTier: "3"
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: kconmon
+        component: controller
+    spec:
+      serviceAccountName: kconmon
+      containers:
+      - name: agent
+        image: "{{ required "Please specify the docker image" .Values.docker.image }}:{{ required "Please specify the docker tag" .Values.docker.tag }}"
+        imagePullPolicy: IfNotPresent
+        args:
+        - node
+        - lib/apps/controller/index.js
+        env:
+        - name: CONTAINER_RESOURCE_REQUEST_MEMORY
+          valueFrom:
+            resourceFieldRef:
+              divisor: "0"
+              resource: requests.memory
+        - name: CONTAINER_RESOURCE_LIMIT_MEMORY
+          valueFrom:
+            resourceFieldRef:
+              divisor: "0"
+              resource: limits.memory
+        - name: DEPLOYMENT_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CONFIG
+          value: {{ $.Values.config | toJson | quote }}
+        ports:
+        - name: http-web
+          containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          initialDelaySeconds: 2
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+          failureThreshold: 1
+          httpGet:
+            path: /readiness
+            port: 8080
+        resources:
+          requests:
+            cpu: 50m
+            memory: 80Mi
+          limits:
+            memory: 128Mi

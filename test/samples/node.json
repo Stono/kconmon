@@ -1,0 +1,48 @@
+{
+  "type": "UPDATED",
+  "object": {
+    "apiVersion": "v1",
+    "kind": "Node",
+    "metadata": {
+      "annotations": {
+        "container.googleapis.com/instance_id": "7484356131799260764",
+        "node.alpha.kubernetes.io/ttl": "0",
+        "projectcalico.org/IPv4IPIPTunnelAddr": "10.206.5.1",
+        "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+      },
+      "creationTimestamp": "2020-05-20T07:48:23Z",
+      "labels": {
+        "beta.kubernetes.io/arch": "amd64",
+        "beta.kubernetes.io/fluentd-ds-ready": "true",
+        "beta.kubernetes.io/instance-type": "n2-custom-4-6144",
+        "beta.kubernetes.io/masq-agent-ds-ready": "true",
+        "beta.kubernetes.io/os": "linux",
+        "cloud.google.com/gke-nodepool": "core-20191114",
+        "cloud.google.com/gke-os-distribution": "cos",
+        "failure-domain.beta.kubernetes.io/region": "europe-west4",
+        "failure-domain.beta.kubernetes.io/zone": "europe-west4-a",
+        "kubernetes.io/arch": "amd64",
+        "kubernetes.io/hostname": "gke-delivery-platform-core-20191114-d0aec4bb-6pzr",
+        "kubernetes.io/os": "linux",
+        "node.kubernetes.io/masq-agent-ds-ready": "true",
+        "projectcalico.org/ds-ready": "true",
+        "purpose": "core"
+      },
+      "name": "gke-delivery-platform-core-20191114-d0aec4bb-6pzr",
+      "resourceVersion": "226835919",
+      "selfLink": "/api/v1/nodes/gke-delivery-platform-core-20191114-d0aec4bb-6pzr",
+      "uid": "dd7c4a43-87a7-4117-bf75-fbfdb94471b0"
+    },
+    "spec": {
+      "podCIDR": "10.206.5.0/24",
+      "providerID": "gce://at-delivery-platform-testing/europe-west4-a/gke-delivery-platform-core-20191114-d0aec4bb-6pzr",
+      "taints": [
+        {
+          "effect": "NoSchedule",
+          "key": "key",
+          "value": "core"
+        }
+      ]
+    }
+  }
+}

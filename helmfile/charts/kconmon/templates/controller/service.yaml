@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+{{ include "kconmon.app.labels.standard" . | indent 4 }}
+  name: controller
+spec:
+  ports:
+  - name: http-web
+    port: 80
+    protocol: TCP
+    targetPort: http-web
+  selector:
+    app: kconmon
+    component: controller
+  sessionAffinity: None
+  type: ClusterIP

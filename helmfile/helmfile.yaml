@@ -1,0 +1,4 @@
+releases:
+  - name: kconmon
+    namespace: kconmon
+    chart: ./charts/kconmon

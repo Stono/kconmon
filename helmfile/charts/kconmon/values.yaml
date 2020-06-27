@@ -1,0 +1,36 @@
+docker:
+  image: stono/kconmon
+  tag: latest
+
+# Should we run an initContainer that enables core tcp connection setting tweaks
+enableTcpTweaks: true
+
+config:
+  # What port should the server listen on
+  port: 8080
+
+  # These are nodes where you do not wish to run the agent
+  nodeAntiAffinity:
+    - key: airflow
+      value: true
+
+  # This is the well known label on a node which identifies the zone
+  failureDomainLabel: failure-domain.beta.kubernetes.io/zone
+
+  # TCP test configuration
+  tcp:
+    interval: 5000
+    timeout: 1000
+
+  # UDP test configuration
+  udp:
+    interval: 5000
+    # This is a per-packet timeout
+    timeout: 250
+    packets: 10
+
+resources:
+  agent:
+    # This will scale with the number of nodes in your cluster at loosely 1m per node
+    # The minimum value is 25m
+    cpu: 70m

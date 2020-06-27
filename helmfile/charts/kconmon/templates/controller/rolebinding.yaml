@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+{{ include "kconmon.app.labels.standard" . | indent 4 }}
+  name: kconmon
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kconmon
+subjects:
+- kind: ServiceAccount
+  name: kconmon
+  namespace: {{ .Release.Namespace }}
