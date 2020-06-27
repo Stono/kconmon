@@ -79,16 +79,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set env
-        id: set_env
-        run: echo ::set-env name=VERSION::${GITHUB_REF#refs/tags/v}
+      - name: Set output
+        id: set_output
+        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ steps.set_env.outputs.VERSION }}
-          release_name: ${{ steps.set_env.outputs.VERSION }}
+          tag_name: ${{ steps.set_output.outputs.VERSION }}
+          release_name: ${{ steps.set_output.outputs.VERSION }}
           draft: false
           prerelease: false
 
