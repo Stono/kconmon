@@ -1,6 +1,6 @@
 name: kconmon
 # Do not change this line, it gets set by GoCD
-version: 0.1.0
+version: 0.0.4
 description: A project for testing & monitor kubernetes nodes with TCP and UDP
 keywords:
 home:
