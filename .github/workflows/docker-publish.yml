@@ -15,6 +15,7 @@ env:
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   VERSION: v0.0.0
+  IMAGE: stono/kconmon
 
 jobs:
   docker:
@@ -31,8 +32,13 @@ jobs:
       - name: Log into registry
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u stono --password-stdin
 
-      - name: Push image
+      - name: Push 0.0.0 image
         run: docker-compose push
+
+      - name: Push latest image
+        run: |
+          docker tag $IMAGE:$VERSION $IMAGE:latest
+          docker push $IMAGE:latest
 
   helm:
     runs-on: ubuntu-latest
