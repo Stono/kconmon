@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
 
 env:
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
