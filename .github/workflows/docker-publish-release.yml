@@ -16,7 +16,14 @@ jobs:
 
     steps:
       - name: Set env
-        run: echo ::set-env name=VERSION::${GITHUB_REF#refs/*/}
+        run: echo ::set-env name=VERSION::${GITHUB_REF#refs/tags/}
+      - name: Echo env
+        run: |
+          if [ -z "$VERSION" ]; then
+            echo "ERROR: Version was not set"
+            exit 1
+          fi
+          echo Target version: $VERSION
 
   docker:
     needs: config
