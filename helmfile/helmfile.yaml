@@ -4,4 +4,4 @@ releases:
     chart: ./charts/kconmon
     set:
       - name: docker.tag
-        value: 0.0.1
+        value: latest
