@@ -1,9 +1,7 @@
 name: Publish Docker Release
 
 on:
-  push:
-    branches:
-      - master
+  create:
     tags:
       - v*
 
