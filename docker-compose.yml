@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   controller:
-    image: stono/kconmon
+    image: docker.pkg.github.com/kconmon
     build:
       context: '.'
       args:

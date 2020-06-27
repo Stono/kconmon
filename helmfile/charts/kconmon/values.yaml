@@ -1,5 +1,5 @@
 docker:
-  image: stono/kconmon
+  image: docker.pkg.github.com/kconmon
   tag: latest
 
 # Should we run an initContainer that enables core tcp connection setting tweaks
