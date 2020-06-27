@@ -26,6 +26,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Pull image
+        run: VERSION=latest docker-compose pull
+
       - name: Build image
         run: docker-compose build
 
