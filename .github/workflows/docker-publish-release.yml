@@ -5,6 +5,9 @@ on:
     tags:
       - v*
 
+env:
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -25,11 +28,11 @@ jobs:
         run: docker-compose build
 
       - name: Log into registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u stono --password-stdin
 
       - name: Push image
         run: |
-          IMAGE=docker.pkg.github.com/stono/kconmon/node
+          IMAGE=stono/kconmon
 
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
