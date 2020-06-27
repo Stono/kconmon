@@ -27,16 +27,16 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Pull image
-        run: VERSION=latest docker-compose pull
+        run: VERSION=latest docker-compose pull controller
 
       - name: Build image
-        run: docker-compose build
+        run: docker-compose build controller
 
       - name: Log into registry
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u stono --password-stdin
 
       - name: Push 0.0.0 image
-        run: docker-compose push
+        run: docker-compose push controller
 
   helm:
     needs: config
