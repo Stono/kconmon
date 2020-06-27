@@ -42,9 +42,12 @@ jobs:
 
       - name: Package Helm
         run: |
-          wget --quiet https://get.helm.sh/helm-v2.16.9-linux-amd64.tar.gz
-          tar xf helm-v2.16.9-linux-amd64.tar.gz
-          helm init --client-only
           cd ./helmfile/charts/kconmon
-          ../../../linux-amd64/helm package .
+          helm package .
           mv kconmon*.tgz kconmon-chart.tgz
+
+      - name: Upload the helm file
+        uses: actions/upload-artifact@v1
+        with:
+          name: helm-chart
+          path: ./helmfile/charts/kconmon/kconmon-chart.tgz
