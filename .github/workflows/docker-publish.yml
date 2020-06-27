@@ -1,11 +1,9 @@
-name: Docker
+name: Publish Docker Latest
 
 on:
   push:
     branches:
       - master
-env:
-  IMAGE_NAME: kconmon
 
 jobs:
   test:
@@ -13,8 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: |
-          docker-compose build
+        run: docker-compose build
 
   push:
     needs: test

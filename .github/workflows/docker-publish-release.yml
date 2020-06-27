@@ -1,4 +1,4 @@
-name: Docker
+name: Publish Docker Release
 
 on:
   push:
@@ -6,8 +6,6 @@ on:
       - master
     tags:
       - v*
-env:
-  IMAGE_NAME: kconmon
 
 jobs:
   test:
@@ -15,8 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: |
-          docker-compose build
+        run: docker-compose build
 
   push:
     needs: test
@@ -35,22 +32,11 @@ jobs:
 
       - name: Push image
         run: |
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
-
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
-
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          docker tag docker.pkg.github.com/kconmon/node:latest docker.pkg.github.com/kconmon/node:$VERSION
+          docker push docker.pkg.github.com/kconmon/node:$VERSION
