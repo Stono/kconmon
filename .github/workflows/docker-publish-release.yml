@@ -31,14 +31,16 @@ jobs:
 
       - name: Push image
         run: |
+          IMAGE=docker.pkg.github.com/stono/kconmon/node
+
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Strip "v" prefix from tag name
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
-          docker tag docker.pkg.github.com/kconmon/node:latest docker.pkg.github.com/kconmon/node:$VERSION
-          docker push docker.pkg.github.com/kconmon/node:$VERSION
+          docker tag $IMAGE:latest $IMAGE:$VERSION
+          docker push $IMAGE:$VERSION
 
   release:
     needs: push

@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   controller:
-    image: docker.pkg.github.com/kconmon/node
+    image: docker.pkg.github.com/stono/kconmon/node
     build:
       context: '.'
       args:
@@ -24,7 +24,7 @@ services:
       - ~/.kube:/home/nonroot/.kube:ro
 
   agent:
-    image: docker.pkg.github.com/kconmon/node
+    image: docker.pkg.github.com/stono/kconmon/node
     command: 'node lib/apps/agent/index.js'
     environment:
       PORT: '80' # Run on port 80 locally in docker-compose to replicate kubernetes service object port magenting
