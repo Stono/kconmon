@@ -17,7 +17,6 @@ jobs:
 
   push:
     needs: test
-
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
@@ -40,3 +39,22 @@ jobs:
 
           docker tag docker.pkg.github.com/kconmon/node:latest docker.pkg.github.com/kconmon/node:$VERSION
           docker push docker.pkg.github.com/kconmon/node:$VERSION
+
+  release:
+    needs: push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
