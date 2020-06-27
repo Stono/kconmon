@@ -43,7 +43,7 @@ jobs:
       - name: Package Helm
         run: |
           cd ./helmfile/charts/kconmon
-          helm package .
+          helm package --version=latest .
           mv kconmon*.tgz kconmon-chart.tgz
 
       - name: Upload the helm chart
