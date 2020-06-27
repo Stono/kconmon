@@ -15,7 +15,7 @@ env:
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
-  push:
+  docker:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
 
@@ -31,3 +31,20 @@ jobs:
 
       - name: Push image
         run: docker-compose push
+
+  helm:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Package Helm
+        run: |
+          wget --quiet https://get.helm.sh/helm-v2.16.9-linux-amd64.tar.gz
+          tar xf helm-v2.16.9-linux-amd64.tar.gz
+          helm init --client-only
+          cd ./helmfile/charts/kconmon
+          ../../../linux-amd64/helm package .
+          mv kconmon*.tgz kconmon-chart.tgz

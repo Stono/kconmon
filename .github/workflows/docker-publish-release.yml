@@ -10,7 +10,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  push:
+  docker:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,7 +37,21 @@ jobs:
           docker push $IMAGE:$VERSION
 
   release:
-    needs: push
+    needs: docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+  helm:
+    needs: release
     runs-on: ubuntu-latest
 
     steps:
@@ -51,15 +65,6 @@ jobs:
           cd ./helmfile/charts/kconmon
           ../../../linux-amd64/helm package .
           mv kconmon*.tgz kconmon-chart.tgz
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
 
       - name: Upload Release Asset
         id: upload-release-asset
