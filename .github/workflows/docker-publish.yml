@@ -53,7 +53,9 @@ jobs:
           path: ./helmfile/charts/kconmon/kconmon-chart.tgz
 
   release:
-    needs: docker
+    needs:
+      - docker
+      - helm
     runs-on: ubuntu-latest
 
     steps:
