@@ -71,7 +71,8 @@ jobs:
         with:
           tag_name: latest
           release_name: Latest
-          draft: true
+          draft: false
+          prerelease: false
 
       - name: Download helm chart
         uses: actions/download-artifact@v1
