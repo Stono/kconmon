@@ -29,7 +29,7 @@ spec:
       serviceAccountName: kconmon
       containers:
       - name: agent
-        image: "{{ required "Please specify the docker image" .Values.docker.image }}:{{ required "Please specify the docker tag" .Values.docker.tag }}"
+        image: "{{ required "Please specify the docker image" .Values.docker.image }}:{{ default .Values.docker.tag .Chart.Version }}"
         imagePullPolicy: IfNotPresent
         args:
         - node

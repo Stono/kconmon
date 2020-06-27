@@ -1,6 +1,5 @@
 docker:
   image: stono/kconmon
-  tag: 0.0.3
 
 # Should we run an initContainer that enables core tcp connection setting tweaks
 enableTcpTweaks: true
