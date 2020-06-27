@@ -99,13 +99,4 @@ groups:
 
 ## Deployment
 
-`kconmon` is installed with helm, so edit [the helm values file](helmfile/charts/kconmon/values.yaml) if you want to change any of the defaults. There are a bunch of options like specifying your affinity label, and excluding any nodes you don't want the agent to run on.
-
-I personally use [helmfile](https://github.com/roboll/helmfile) as well, so simply do:
-
-```
-cd helmfile
-helmfile sync
-```
-
-and the magic should happen.
+The easiest way to install `kconmon` is with Helm. Head over to the [releases](https://github.com/Stono/kconmon/releases) page to download the latest chart. Check out the [values.yaml](helmfile/charts/kconmon/values.yaml) for all the available configuration options.
