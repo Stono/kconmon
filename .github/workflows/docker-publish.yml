@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'lib/**'
-      - 'test/**'
-      - 'Dockerfile'
-      - 'docker-compose.yml'
+    paths-ignore:
+      - README.md
+      - helmfile/**
+      - images/**
+      - .vscode/**
+      - samples/**
 
 env:
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
