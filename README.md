@@ -26,10 +26,13 @@ The agent also spawns with an initContainer, which sets some sysctl tcp optimisa
 
 In order to discover other agents, and enrich the agent information with metadata about the node and availability zone, the controller constantly watches the kubernetes API and maintains the current state in memory. The agents connect to the controller when they start, to get their own metadata, and then every 5 seconds in order to get an up to date agent list.
 
-**NOTE** Your cluster needs RBAC enabled as the controller uses in-cluster service-account authentication with the kubernetes master.
+**NOTE**: Your cluster needs RBAC enabled as the controller uses in-cluster service-account authentication with the kubernetes master.
 
+## Testing
 
-## UDP Testing
+`kconmon` does a variety of different tests, and exposes the results as prometheus metrics enriched with the node and locality information.
+
+### UDP Testing
 
 `kmoncon` will perform 10 x 4 byte UDP packet tests between every other agent, every 5 seconds. Each test waits for a response from the destination agent. The RTT timeout is 250ms, anything longer than that and we consider the packets lost in the abyss. The metrics output from UDP tests are:
 
@@ -37,7 +40,7 @@ In order to discover other agents, and enrich the agent information with metadat
 - `GAUGE kconmon_udp_duration_variance_milliseconds`: The variance between the slowest and the fastest packet
 - `GAUGE kconmon_udp_loss`: The percentage of requests from the batch that failed
 
-## TCP Testing
+### TCP Testing
 
 `kmoncon` will perform a since HTTP GET request between every other agent, every 5 seconds. Each connection is terminated with `Connection: close` and [Nagle's Algorithm](https://en.wikipedia.org/wiki/Nagle%27s_algorithm) as disabled to ensure consistency across tests.
 
