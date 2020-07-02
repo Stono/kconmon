@@ -56,7 +56,7 @@ spec:
           sysctl -w net.ipv4.tcp_sack=0
           sysctl -w net.ipv4.tcp_fack=0
         imagePullPolicy: IfNotPresent
-        image: "{{ required "Please specify the docker image" .Values.docker.image }}:{{ default .Values.docker.tag .Chart.Version }}"
+        image: "{{ required "Please specify the docker image" .Values.docker.image }}:{{ .Values.docker.tag | default .Chart.Version }}"
         securityContext:
           privileged: true
           runAsUser: 0
@@ -64,7 +64,7 @@ spec:
 
       containers:
       - name: agent
-        image: "{{ required "Please specify the docker image" .Values.docker.image }}:{{ default .Values.docker.tag .Chart.Version }}"
+        image: "{{ required "Please specify the docker image" .Values.docker.image }}:{{ .Values.docker.tag | default .Chart.Version }}"
         imagePullPolicy: IfNotPresent
         args:
         - node
