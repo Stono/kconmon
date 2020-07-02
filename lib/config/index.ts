@@ -43,8 +43,7 @@ export class Config implements IConfig {
   public readonly port: number = getEnv('port', 8080)
   public readonly namespace: string =
     process.env.DEPLOYMENT_NAMESPACE || 'kconmon'
-  public readonly metricsPrefix: string =
-    process.env.DEPLOYMENT_NAMESPACE || 'kconmon'
+  public readonly metricsPrefix: string = getEnv('metricsPrefix', 'kconmon')
   public readonly environment: string = getEnv('environment', 'testing')
   public readonly failureDomainLabel: string = getEnv(
     'failureDomainLabel',

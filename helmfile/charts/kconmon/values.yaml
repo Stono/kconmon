@@ -8,6 +8,9 @@ config:
   # What port should the server listen on
   port: 8080
 
+  # What should the prometheus metrics be prefixed with
+  metricsPrefix: kconmon
+
   # These are nodes where you do not wish to run the agent
   nodeAntiAffinity:
     - key: airflow
