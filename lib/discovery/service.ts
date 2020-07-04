@@ -20,7 +20,6 @@ export default class ServiceDiscovery implements IDiscovery {
       const result = await this.got<IAgent[]>(
         `http://controller.${this.config.namespace}.svc.cluster.local./agents`,
         {
-          responseType: 'json',
           timeout: 500,
           retry: {
             limit: 2
@@ -42,7 +41,6 @@ export default class ServiceDiscovery implements IDiscovery {
       const result = await this.got<IAgent>(
         `http://controller.${this.config.namespace}.svc.cluster.local./agent/${name}`,
         {
-          responseType: 'json',
           timeout: 500,
           retry: {
             limit: 2

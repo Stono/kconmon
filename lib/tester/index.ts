@@ -2,7 +2,7 @@ import { Got } from 'got/dist/source'
 import { IDiscovery, IAgent } from 'lib/discovery'
 import { PlainResponse } from 'got/dist/source/core'
 import { IMetrics } from 'lib/apps/agent/metrics'
-import { IUDPClient, IUDPPingResult } from 'lib/udp/client'
+import UDPClient, { IUDPClient, IUDPPingResult } from 'lib/udp/client'
 import { IConfig } from 'lib/config'
 import Logger, { ILogger } from 'lib/logger'
 
@@ -35,23 +35,21 @@ export default class Tester implements ITester {
   private logger: ILogger = new Logger('tester')
   private metrics: IMetrics
   private me: IAgent
-  private udpClient: IUDPClient
   private running = false
   private config: IConfig
+  private clients: { [key: string]: IUDPClient } = {}
 
   constructor(
     config: IConfig,
     got: Got,
     discovery: IDiscovery,
     metrics: IMetrics,
-    me: IAgent,
-    udpClient: IUDPClient
+    me: IAgent
   ) {
     this.got = got
     this.discovery = discovery
     this.metrics = metrics
     this.me = me
-    this.udpClient = udpClient
     this.config = config
   }
 
@@ -92,11 +90,25 @@ export default class Tester implements ITester {
   }
 
   public async runUdpTests(agents: IAgent[]): Promise<IUDPTestResult[]> {
+    agents.forEach((agent) => {
+      if (!this.clients[agent.ip]) {
+        this.logger.info(`new udp client created for ${agent.ip}`)
+        this.clients[agent.ip] = new UDPClient(agent.ip, this.config.port)
+      }
+    })
+    Object.keys(this.clients).forEach((ip) => {
+      const agent = agents.find((a) => a.ip === ip)
+      if (!agent) {
+        this.logger.info(`udp client removed for ${ip}`)
+        this.clients[ip].destroy()
+        delete this.clients[ip]
+      }
+    })
+
     const results: IUDPTestResult[] = []
     const testAgent = async (agent: IAgent): Promise<void> => {
-      const result = await this.udpClient.ping(
-        agent.ip,
-        this.config.port,
+      const client = this.clients[agent.ip]
+      const result = await client.ping(
         this.config.testConfig.udp.timeout,
         this.config.testConfig.udp.packets
       )

@@ -2,12 +2,8 @@ import * as udp from 'dgram'
 import Logger, { ILogger } from 'lib/logger'
 
 export interface IUDPClient {
-  ping(
-    host: string,
-    port: number,
-    timeoutMs: number,
-    times: number
-  ): Promise<IUDPPingResult>
+  ping(timeoutMs: number, times: number): Promise<IUDPPingResult>
+  destroy(): void
 }
 
 export interface IUDPSinglePingResult {
@@ -32,14 +28,25 @@ const delay = (ms: number) => {
 
 export default class UDPClient implements IUDPClient {
   private logger: ILogger = new Logger('udp-client')
+  private host: string
+  private port: number
+  private client: udp.Socket
 
-  public async ping(
-    host: string,
-    port: number,
-    timeoutMs: number,
-    times: number
-  ): Promise<IUDPPingResult> {
-    const client = udp.createSocket('udp4')
+  constructor(host: string, port: number) {
+    this.host = host
+    this.port = port
+    this.client = udp.createSocket('udp4')
+  }
+
+  public destroy() {
+    try {
+      this.client.close()
+    } catch (ex) {
+      this.logger.error('failed to close client', ex)
+    }
+  }
+
+  public async ping(timeoutMs: number, times: number): Promise<IUDPPingResult> {
     const results: IUDPSinglePingResult[] = []
     const sendPing = () => {
       return new Promise<number>((resolve, reject) => {
@@ -51,14 +58,14 @@ export default class UDPClient implements IUDPClient {
         const data = Buffer.from('ping')
         let hrstart = process.hrtime()
 
-        client.on('message', () => {
+        this.client.on('message', () => {
           const hrend = process.hrtime(hrstart)
           clearTimeout(timeout)
           resolve(hrend[1] / 1000000)
         })
 
         hrstart = process.hrtime()
-        client.send(data, port, host, (error) => {
+        this.client.send(data, this.port, this.host, (error) => {
           if (error) {
             this.logger.error('failed to send udp packet', error)
             reject(error)
@@ -78,7 +85,7 @@ export default class UDPClient implements IUDPClient {
           }
         })
         .finally(() => {
-          client.removeAllListeners()
+          this.client.removeAllListeners()
         })
     }
 
@@ -92,8 +99,10 @@ export default class UDPClient implements IUDPClient {
         })
         await delay(50)
       }
+    } catch (ex) {
+      this.logger.error('failed to ping', ex)
     } finally {
-      client.close()
+      this.client.removeAllListeners()
     }
 
     const durations = results.map((result) => result.duration).sort()

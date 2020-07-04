@@ -18,7 +18,6 @@ import IndexRoutes from 'lib/apps/agent/routes'
 import Metrics from './metrics'
 import * as os from 'os'
 import UDPServer from 'lib/udp/server'
-import UDPClient from 'lib/udp/client'
 import config from 'lib/config'
 import Logger from 'lib/logger'
 const webServer = new WebServer(config)
@@ -30,7 +29,6 @@ const udpServer = new UDPServer(config)
 const delay = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
-const udpClient = new UDPClient()
 
 ;(async () => {
   await discovery.start()
@@ -43,7 +41,7 @@ const udpClient = new UDPClient()
     process.exit(1)
   }
   logger.info(`loaded metadata`, me)
-  const tester = new Tester(config, got, discovery, metrics, me, udpClient)
+  const tester = new Tester(config, got, discovery, metrics, me)
   const handlerInit = (app: Application): Promise<void> => {
     const indexController = new IndexController(metrics, tester, discovery)
     new IndexRoutes().applyRoutes(app, indexController)
