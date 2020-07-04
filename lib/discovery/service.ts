@@ -18,7 +18,7 @@ export default class ServiceDiscovery implements IDiscovery {
   public async agents(): Promise<IAgent[]> {
     try {
       const result = await this.got<IAgent[]>(
-        `http://controller.${this.config.namespace}.svc.cluster.local/agents`,
+        `http://controller.${this.config.namespace}.svc.cluster.local./agents`,
         {
           responseType: 'json',
           timeout: 500,
@@ -41,7 +41,7 @@ export default class ServiceDiscovery implements IDiscovery {
   public async agent(name: string): Promise<IAgent | null> {
     try {
       const result = await this.got<IAgent>(
-        `http://controller.${this.config.namespace}.svc.cluster.local/agent/${name}`,
+        `http://controller.${this.config.namespace}.svc.cluster.local./agent/${name}`,
         {
           responseType: 'json',
           timeout: 500,
