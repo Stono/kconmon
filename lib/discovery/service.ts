@@ -21,6 +21,7 @@ export default class ServiceDiscovery implements IDiscovery {
         `http://controller.${this.config.namespace}.svc.cluster.local./agents`,
         {
           timeout: 500,
+          responseType: 'json',
           retry: {
             limit: 2
           }
@@ -42,6 +43,7 @@ export default class ServiceDiscovery implements IDiscovery {
         `http://controller.${this.config.namespace}.svc.cluster.local./agent/${name}`,
         {
           timeout: 500,
+          responseType: 'json',
           retry: {
             limit: 2
           }
