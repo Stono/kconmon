@@ -29,6 +29,7 @@ export default class WebServer implements IWebServer {
 
     const app: express.Application = express()
     app.set('etag', false)
+    app.disable('etag')
     app.disable('x-powered-by')
 
     await handlerInit(app)
