@@ -56,7 +56,7 @@ const delay = (ms: number) => {
     await tester.stop()
     logger.info(`shutting down web and udp server in ${shutdownPeriod}ms`)
     setTimeout(async () => {
-      await await udpServer.stop()
+      await udpServer.stop()
       await webServer.stop()
       setTimeout(() => {
         process.exit(0)
