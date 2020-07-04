@@ -22,6 +22,7 @@ export default class ServiceDiscovery implements IDiscovery {
         {
           responseType: 'json',
           timeout: 500,
+          dnsCache: true,
           retry: {
             limit: 2
           }
@@ -44,6 +45,7 @@ export default class ServiceDiscovery implements IDiscovery {
         {
           responseType: 'json',
           timeout: 500,
+          dnsCache: true,
           retry: {
             limit: 2
           }
