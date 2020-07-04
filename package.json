@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "express": "4.17.1",
-    "got": "11.3.0",
+    "got": "11.4.0",
     "prom-client": "12.0.0",
     "stoppable": "1.1.0",
     "tsconfig-paths": "3.9.0",
@@ -37,13 +37,13 @@
     "@types/mocha": "7.0.2",
     "@types/node": "14.0.14",
     "@types/json-patch": "0.0.30",
-    "@typescript-eslint/eslint-plugin": "3.4.0",
-    "@typescript-eslint/parser": "3.4.0",
-    "eslint": "7.3.1",
+    "@typescript-eslint/eslint-plugin": "3.5.0",
+    "@typescript-eslint/parser": "3.5.0",
+    "eslint": "7.4.0",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-mocha": "7.0.1",
     "eslint-plugin-prettier": "3.1.4",
-    "grunt": "1.1.0",
+    "grunt": "1.2.0",
     "grunt-contrib-copy": "1.0.0",
     "grunt-contrib-watch": "1.1.0",
     "grunt-env": "1.0.1",
@@ -56,7 +56,7 @@
     "should": "13.2.3",
     "testdouble": "3.16.0",
     "ts-node": "8.10.2",
-    "typescript": "3.9.5"
+    "typescript": "3.9.6"
   },
   "keywords": [],
   "license": "MIT"
