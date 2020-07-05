@@ -1,29 +1,24 @@
 export interface IMetrics {
-  handleTCPTestSuccess(result: ITCPTestSuccessResult)
-  handleTCPTestFailure(result: ITCPTestFailResult)
+  handleTCPTestResult(result: ITCPTestResult)
   handleUDPTestResult(result: IUDPTestResult)
   handleDNSTestResult(result: IDNSTestResult)
   toString()
-  resetTCPMetrics()
-  resetUDPMetrics()
 }
 
 import * as client from 'prom-client'
-import {
-  ITCPTestSuccessResult,
-  ITCPTestFailResult,
-  IUDPTestResult,
-  IDNSTestResult
-} from 'lib/tester'
+import { IUDPTestResult, IDNSTestResult, ITCPTestResult } from 'lib/tester'
 import { IConfig } from 'lib/config'
 
 export default class Metrics implements IMetrics {
-  private TCPConnect: client.Gauge<string>
+  private TCP: client.Counter<string>
   private TCPDuration: client.Gauge<string>
-  private failCounter: client.Counter<string>
+  private TCPConnect: client.Gauge<string>
+
+  private UDP: client.Counter<string>
   private UDPDuration: client.Gauge<string>
   private UDPVariance: client.Gauge<string>
   private UDPLoss: client.Gauge<string>
+
   private DNS: client.Counter<string>
 
   constructor(config: IConfig) {
@@ -64,28 +59,29 @@ export default class Metrics implements IMetrics {
       name: `${config.metricsPrefix}_dns_results_total`
     })
 
-    this.failCounter = new client.Counter<string>({
-      help: 'Counter of failed tests',
+    this.UDP = new client.Counter<string>({
+      help: 'UDP Test Results',
       labelNames: [
-        'type',
         'source',
         'destination',
         'source_zone',
-        'destination_zone'
+        'destination_zone',
+        'result'
       ],
-      name: `${config.metricsPrefix}_fail_total`
+      name: `${config.metricsPrefix}_udp_results_total`
     })
-  }
 
-  public resetTCPMetrics(): void {
-    this.TCPConnect.reset()
-    this.TCPDuration.reset()
-  }
-
-  public resetUDPMetrics(): void {
-    this.UDPDuration.reset()
-    this.UDPLoss.reset()
-    this.UDPVariance.reset()
+    this.TCP = new client.Counter<string>({
+      help: 'TCP Test Results',
+      labelNames: [
+        'source',
+        'destination',
+        'source_zone',
+        'destination_zone',
+        'result'
+      ],
+      name: `${config.metricsPrefix}_tcp_results_total`
+    })
   }
 
   public handleDNSTestResult(result: IDNSTestResult): void {
@@ -98,60 +94,71 @@ export default class Metrics implements IMetrics {
     const destination = result.destination.nodeName
     const sourceZone = result.source.zone
     const destinationZone = result.destination.zone
-    if (result.timings.success === false) {
-      this.failCounter
-        .labels('udp', source, destination, sourceZone, destinationZone)
-        .inc(1)
+    this.UDP.labels(
+      source,
+      destination,
+      sourceZone,
+      destinationZone,
+      result.result
+    ).inc(1)
+
+    if (result.timings) {
+      this.UDPDuration.reset()
+      this.UDPLoss.reset()
+      this.UDPVariance.reset()
+      this.UDPDuration.labels(
+        source,
+        destination,
+        sourceZone,
+        destinationZone
+      ).set(result.timings.average)
+
+      this.UDPVariance.labels(
+        source,
+        destination,
+        sourceZone,
+        destinationZone
+      ).set(result.timings.variance)
+
+      this.UDPLoss.labels(source, destination, sourceZone, destinationZone).set(
+        result.timings.loss
+      )
     }
-
-    this.UDPDuration.labels(
-      source,
-      destination,
-      sourceZone,
-      destinationZone
-    ).set(result.timings.average)
-    this.UDPVariance.labels(
-      source,
-      destination,
-      sourceZone,
-      destinationZone
-    ).set(result.timings.variance)
-    this.UDPLoss.labels(source, destination, sourceZone, destinationZone).set(
-      result.timings.loss
-    )
   }
 
-  public handleTCPTestSuccess(result: ITCPTestSuccessResult): void {
+  public handleTCPTestResult(result: ITCPTestResult): void {
     const source = result.source.nodeName
     const destination = result.destination.nodeName
     const sourceZone = result.source.zone
     const destinationZone = result.destination.zone
-    this.TCPConnect.labels(
+    this.TCP.labels(
       source,
       destination,
       sourceZone,
-      destinationZone
-    ).set(
-      ((result.timings.connect ||
-        result.timings.socket ||
-        result.timings.start) - result.timings.start) as number
-    )
-    this.TCPDuration.labels(
-      source,
-      destination,
-      sourceZone,
-      destinationZone
-    ).set(result.timings.phases.total as number)
-  }
+      destinationZone,
+      result.result
+    ).inc(1)
 
-  public handleTCPTestFailure(result: ITCPTestFailResult): void {
-    const source = result.source.nodeName
-    const destination = result.destination.nodeName
-    const sourceZone = result.source.zone
-    const destinationZone = result.destination.zone
-    this.failCounter
-      .labels('tcp', source, destination, sourceZone, destinationZone)
-      .inc(1)
+    if (result.timings) {
+      this.TCPConnect.reset()
+      this.TCPDuration.reset()
+      this.TCPConnect.labels(
+        source,
+        destination,
+        sourceZone,
+        destinationZone
+      ).set(
+        ((result.timings.connect ||
+          result.timings.socket ||
+          result.timings.start) - result.timings.start) as number
+      )
+      this.TCPDuration.labels(
+        source,
+        destination,
+        sourceZone,
+        destinationZone
+      ).set(result.timings.phases.total as number)
+    }
   }
 
   public toString(): string {

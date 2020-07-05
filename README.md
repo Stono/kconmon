@@ -39,6 +39,7 @@ In order to discover other agents, and enrich the agent information with metadat
 - `GAUGE kconmon_udp_duration_milliseconds`: The total RTT from sending the packet to receiving a response
 - `GAUGE kconmon_udp_duration_variance_milliseconds`: The variance between the slowest and the fastest packet
 - `GAUGE kconmon_udp_loss`: The percentage of requests from the batch that failed
+- `COUNTER kconmon_udp_results_total`: A Counter of test results, pass and fail
 
 ### TCP Testing
 
@@ -48,7 +49,15 @@ The metrics output from TCP tests are:
 
 - `GAUGE kconmon_tcp_connect_milliseconds`: The duration from socket assignment to successful TCP connection
 - `GAUGE kconmon_tcp_duration_milliseconds`: The total RTT of the request
-- `COUNTER kconmon_fail_total{type="tcp"}`: A count of the total tests fails
+- `COUNTER kconmon_tcp_results_total`: A Counter of test results, pass and fail
+
+### DNS Testing
+
+`kconmon` will perform DNS tests by defualt every 5 seconds. It's a good idea to have tests for a variety of different resolvers (eg kube-dns, public etc).
+
+The metrics output from DNS tests are:
+
+- `COUNTER kconmon_dns_results_total`: A Counter of test results, pass and fail
 
 ## Prometheus Metrics
 

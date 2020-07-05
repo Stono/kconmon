@@ -17,6 +17,7 @@ export interface ITester {
 interface ITestResult {
   source: IAgent
   destination: IAgent
+  result: 'pass' | 'fail'
 }
 
 export interface IDNSTestResult {
@@ -26,14 +27,12 @@ export interface IDNSTestResult {
 }
 
 export interface IUDPTestResult extends ITestResult {
-  timings: IUDPPingResult
+  timings?: IUDPPingResult
 }
 
-export interface ITCPTestSuccessResult extends ITestResult {
-  timings: PlainResponse['timings']
+export interface ITCPTestResult extends ITestResult {
+  timings?: PlainResponse['timings']
 }
-
-export interface ITCPTestFailResult extends ITestResult {}
 
 export default class Tester implements ITester {
   private got: Got
@@ -75,14 +74,12 @@ export default class Tester implements ITester {
     }
     const tcpEventLoop = async () => {
       while (this.running) {
-        this.metrics.resetTCPMetrics()
         await this.runTcpTests(agents)
         await delay(this.config.testConfig.tcp.interval)
       }
     }
     const udpEventLoop = async () => {
       while (this.running) {
-        this.metrics.resetUDPMetrics()
         await this.runUdpTests(agents)
         await delay(this.config.testConfig.udp.interval)
       }
@@ -159,10 +156,11 @@ export default class Tester implements ITester {
       if (result.loss > 0) {
         this.logger.warn('packet loss detected', result)
       }
-      const testResult = {
+      const testResult: IUDPTestResult = {
         source: this.me,
         destination: agent,
-        timings: result
+        timings: result,
+        result: result.loss > 0 ? 'fail' : 'pass'
       }
       results.push(testResult)
       this.metrics.handleUDPTestResult(testResult)
@@ -180,12 +178,13 @@ export default class Tester implements ITester {
         const result = await this.got(url, {
           timeout: this.config.testConfig.tcp.timeout
         })
-        const mappedResult = {
+        const mappedResult: ITCPTestResult = {
           source: this.me,
           destination: agent,
-          timings: result.timings
+          timings: result.timings,
+          result: 'pass'
         }
-        this.metrics.handleTCPTestSuccess(mappedResult)
+        this.metrics.handleTCPTestResult(mappedResult)
       } catch (ex) {
         this.logger.warn(
           `test failed`,
@@ -195,11 +194,12 @@ export default class Tester implements ITester {
           },
           ex
         )
-        const failResult = {
+        const failResult: ITCPTestResult = {
           source: this.me,
-          destination: agent
+          destination: agent,
+          result: 'fail'
         }
-        this.metrics.handleTCPTestFailure(failResult)
+        this.metrics.handleTCPTestResult(failResult)
       }
     }
     const promises = agents.map(testAgent)
