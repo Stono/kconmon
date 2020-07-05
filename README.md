@@ -8,7 +8,7 @@ It's really performant, considering the number of tests it is doing, on my clust
 
 Once you've got it up and going, you can plot some pretty dashboards like this:
 
-![grafana][screenshots/grafana.png]
+![grafana](screenshots/grafana.png)
 
 **Known Issues**:
 
