@@ -2,6 +2,7 @@ export interface IMetrics {
   handleTCPTestSuccess(result: ITCPTestSuccessResult)
   handleTCPTestFailure(result: ITCPTestFailResult)
   handleUDPTestResult(result: IUDPTestResult)
+  handleDNSTestResult(result: IDNSTestResult)
   toString()
   resetTCPMetrics()
   resetUDPMetrics()
@@ -11,7 +12,8 @@ import * as client from 'prom-client'
 import {
   ITCPTestSuccessResult,
   ITCPTestFailResult,
-  IUDPTestResult
+  IUDPTestResult,
+  IDNSTestResult
 } from 'lib/tester'
 import { IConfig } from 'lib/config'
 
@@ -22,10 +24,9 @@ export default class Metrics implements IMetrics {
   private UDPDuration: client.Gauge<string>
   private UDPVariance: client.Gauge<string>
   private UDPLoss: client.Gauge<string>
-  private config: IConfig
+  private DNS: client.Counter<string>
 
   constructor(config: IConfig) {
-    this.config = config
     client.register.clear()
     this.TCPConnect = new client.Gauge<string>({
       help: 'Time taken to establish the TCP socket',
@@ -57,6 +58,12 @@ export default class Metrics implements IMetrics {
       name: `${config.metricsPrefix}_udp_loss`
     })
 
+    this.DNS = new client.Counter<string>({
+      help: 'DNS Test Results',
+      labelNames: ['source', 'host', 'result'],
+      name: `${config.metricsPrefix}_dns_results_total`
+    })
+
     this.failCounter = new client.Counter<string>({
       help: 'Counter of failed tests',
       labelNames: [
@@ -79,6 +86,11 @@ export default class Metrics implements IMetrics {
     this.UDPDuration.reset()
     this.UDPLoss.reset()
     this.UDPVariance.reset()
+  }
+
+  public handleDNSTestResult(result: IDNSTestResult): void {
+    const source = result.source.nodeName
+    this.DNS.labels(source, result.host, result.result).inc(1)
   }
 
   public handleUDPTestResult(result: IUDPTestResult): void {

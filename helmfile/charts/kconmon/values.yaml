@@ -31,6 +31,12 @@ config:
     timeout: 250
     packets: 10
 
+  dns:
+    interval: 5000
+    hosts:
+      - www.google.com
+      - kubernetes.default.svc.cluster.local
+
 resources:
   agent:
     # This will scale with the number of nodes in your cluster at loosely 1m per node

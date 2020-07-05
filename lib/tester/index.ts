@@ -5,29 +5,35 @@ import { IMetrics } from 'lib/apps/agent/metrics'
 import UDPClient, { IUDPClient, IUDPPingResult } from 'lib/udp/client'
 import { IConfig } from 'lib/config'
 import Logger, { ILogger } from 'lib/logger'
+import * as dns from 'dns'
 
 export interface ITester {
   start()
   stop()
   runUdpTests(agents: IAgent[]): Promise<IUDPTestResult[]>
+  runDNSTests(): Promise<IDNSTestResult[]>
 }
 
-export interface IUDPTestResult {
+interface ITestResult {
   source: IAgent
   destination: IAgent
+}
+
+export interface IDNSTestResult {
+  source: IAgent
+  host: string
+  result: 'pass' | 'fail'
+}
+
+export interface IUDPTestResult extends ITestResult {
   timings: IUDPPingResult
 }
 
-export interface ITCPTestSuccessResult {
-  source: IAgent
-  destination: IAgent
+export interface ITCPTestSuccessResult extends ITestResult {
   timings: PlainResponse['timings']
 }
 
-export interface ITCPTestFailResult {
-  source: IAgent
-  destination: IAgent
-}
+export interface ITCPTestFailResult extends ITestResult {}
 
 export default class Tester implements ITester {
   private got: Got
@@ -38,6 +44,7 @@ export default class Tester implements ITester {
   private running = false
   private config: IConfig
   private clients: { [key: string]: IUDPClient } = {}
+  private resolver = new dns.promises.Resolver()
 
   constructor(
     config: IConfig,
@@ -80,13 +87,50 @@ export default class Tester implements ITester {
         await delay(this.config.testConfig.udp.interval)
       }
     }
+    const dnsEventLoop = async () => {
+      while (this.running) {
+        await this.runDNSTests()
+        await delay(this.config.testConfig.dns.interval)
+      }
+    }
     agentUpdateLoop()
     tcpEventLoop()
     udpEventLoop()
+    dnsEventLoop()
   }
 
   public async stop(): Promise<void> {
     this.running = false
+  }
+
+  public async runDNSTests(): Promise<IDNSTestResult[]> {
+    const promises = this.config.testConfig.dns.hosts.map(
+      async (host): Promise<IDNSTestResult> => {
+        try {
+          const result = await this.resolver.resolve4(host)
+          const mapped: IDNSTestResult = {
+            source: this.me,
+            host,
+            result: result && result.length > 0 ? 'pass' : 'fail'
+          }
+          this.metrics.handleDNSTestResult(mapped)
+          return mapped
+        } catch (ex) {
+          this.logger.error(`dns test for ${host} failed`, ex)
+          const mapped: IDNSTestResult = {
+            source: this.me,
+            host,
+            result: 'fail'
+          }
+          this.metrics.handleDNSTestResult(mapped)
+          return mapped
+        }
+      }
+    )
+    const result = await Promise.allSettled(promises)
+    return result
+      .filter((r) => r.status === 'fulfilled')
+      .map((i) => (i as PromiseFulfilledResult<IDNSTestResult>).value)
   }
 
   public async runUdpTests(agents: IAgent[]): Promise<IUDPTestResult[]> {

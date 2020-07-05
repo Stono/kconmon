@@ -24,6 +24,10 @@ interface ITestConfiguration {
     timeout: number
     packets: number
   }
+  dns: {
+    interval: number
+    hosts: string[]
+  }
 }
 
 export interface IConfig {
@@ -55,7 +59,8 @@ export class Config implements IConfig {
   }[] = getEnv('nodeAntiAffinity', [])
   public readonly testConfig: ITestConfiguration = {
     tcp: getEnv('tcp', { interval: 5000, timeout: 1000 }),
-    udp: getEnv('udp', { interval: 5000, timeout: 250, packets: 10 })
+    udp: getEnv('udp', { interval: 5000, timeout: 250, packets: 10 }),
+    dns: getEnv('dns', { interval: 5000, hosts: [] })
   }
 }
 
