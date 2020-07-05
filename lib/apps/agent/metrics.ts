@@ -22,6 +22,7 @@ export default class Metrics implements IMetrics {
   private UDPLoss: client.Gauge<string>
 
   private DNS: client.Counter<string>
+  private DNSDuration: client.Gauge<string>
 
   constructor(config: IConfig) {
     client.register.clear()
@@ -38,7 +39,7 @@ export default class Metrics implements IMetrics {
     })
 
     this.UDPDuration = new client.Gauge<string>({
-      help: ' Average duration per packet',
+      help: 'Average duration per packet',
       labelNames: ['source', 'destination', 'source_zone', 'destination_zone'],
       name: `${config.metricsPrefix}_udp_duration_milliseconds`
     })
@@ -59,6 +60,12 @@ export default class Metrics implements IMetrics {
       help: 'DNS Test Results',
       labelNames: ['source', 'source_zone', 'host', 'result'],
       name: `${config.metricsPrefix}_dns_results_total`
+    })
+
+    this.DNSDuration = new client.Gauge<string>({
+      help: 'Total time taken to complete the DNS test',
+      labelNames: ['source', 'source_zone', 'host'],
+      name: `${config.metricsPrefix}_dns_duration_milliseconds`
     })
 
     this.UDP = new client.Counter<string>({
@@ -91,6 +98,11 @@ export default class Metrics implements IMetrics {
     this.DNS.labels(source, result.source.zone, result.host, result.result).inc(
       1
     )
+    this.DNSDuration.labels(
+      result.source.nodeName,
+      result.source.zone,
+      result.host
+    ).set(result.duration)
   }
 
   public resetTCPTestResults() {

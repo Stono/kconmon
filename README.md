@@ -42,9 +42,9 @@ In order to discover other agents, and enrich the agent information with metadat
 
 `kmoncon` agents by default will perform 5 x 4 byte UDP packet tests between every other agent, every 5 seconds. Each test waits for a response from the destination agent. The RTT timeout is 250ms, anything longer than that and we consider the packets lost in the abyss. The metrics output from UDP tests are:
 
-- `GAUGE kconmon_udp_duration_milliseconds`: The total RTT from sending the packet to receiving a response
-- `GAUGE kconmon_udp_duration_variance_milliseconds`: The variance between the slowest and the fastest packet
-- `GAUGE kconmon_udp_loss`: The percentage of requests from the batch that failed
+- `GAUGE   kconmon_udp_duration_milliseconds`: The total RTT from sending the packet to receiving a response
+- `GAUGE   kconmon_udp_duration_variance_milliseconds`: The variance between the slowest and the fastest packet
+- `GAUGE   kconmon_udp_loss`: The percentage of requests from the batch that failed
 - `COUNTER kconmon_udp_results_total`: A Counter of test results, pass and fail
 
 ### TCP Testing
@@ -53,8 +53,8 @@ In order to discover other agents, and enrich the agent information with metadat
 
 The metrics output from TCP tests are:
 
-- `GAUGE kconmon_tcp_connect_milliseconds`: The duration from socket assignment to successful TCP connection
-- `GAUGE kconmon_tcp_duration_milliseconds`: The total RTT of the request
+- `GAUGE   kconmon_tcp_connect_milliseconds`: The duration from socket assignment to successful TCP connection of the last test run
+- `GAUGE   kconmon_tcp_duration_milliseconds`: The total RTT of the request
 - `COUNTER kconmon_tcp_results_total`: A Counter of test results, pass and fail
 
 ### DNS Testing
@@ -63,6 +63,7 @@ The metrics output from TCP tests are:
 
 The metrics output from DNS tests are:
 
+- `GAUGE   kconmon_dns_duration_milliseconds`: The duration of the last test run
 - `COUNTER kconmon_dns_results_total`: A Counter of test results, pass and fail
 
 ## Prometheus Metrics

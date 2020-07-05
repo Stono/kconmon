@@ -24,6 +24,7 @@ interface ITestResult {
 export interface IDNSTestResult {
   source: IAgent
   host: string
+  duration: number
   result: 'pass' | 'fail'
 }
 
@@ -111,20 +112,25 @@ export default class Tester implements ITester {
   public async runDNSTests(): Promise<IDNSTestResult[]> {
     const promises = this.config.testConfig.dns.hosts.map(
       async (host): Promise<IDNSTestResult> => {
+        const hrstart = process.hrtime()
         try {
           const result = await this.resolver.resolve4(host)
+          const hrend = process.hrtime(hrstart)
           const mapped: IDNSTestResult = {
             source: this.me,
             host,
+            duration: hrend[1] / 1000000,
             result: result && result.length > 0 ? 'pass' : 'fail'
           }
           this.metrics.handleDNSTestResult(mapped)
           return mapped
         } catch (ex) {
           this.logger.error(`dns test for ${host} failed`, ex)
+          const hrend = process.hrtime(hrstart)
           const mapped: IDNSTestResult = {
             source: this.me,
             host,
+            duration: hrend[1] / 1000000,
             result: 'fail'
           }
           this.metrics.handleDNSTestResult(mapped)
