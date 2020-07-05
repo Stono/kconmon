@@ -4,7 +4,7 @@ A Kubernetes node connectivity tool that preforms frequent tests, and exposes [P
 
 The idea is this information supplements any other L7 monitoring you use, such as [Istio](https://istio.io/latest/docs/concepts/observability) observability, to help you get to the root cause of a problem faster.
 
-It's really performant, considering the number of tests it is doing, on my clusters of 75 nodes, the agents have a mere 70m CPU request.
+It's really performant, considering the number of tests it is doing, on my clusters of 75 nodes, the agents have a mere 70m CPU/40mb RAM resource request.
 
 Once you've got it up and going, you can plot some pretty dashboards like this:
 
