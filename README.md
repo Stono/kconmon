@@ -10,6 +10,8 @@ Once you've got it up and going, you can plot some pretty dashboards like this:
 
 ![grafana](screenshots/grafana.png)
 
+PS. I've included a sample dashboard [here](grafana-dashboard.json) to get you going
+
 **Known Issues**:
 
 - It's super, mega pre-alpha, the product of a weekends experimentation - so don't expect it to be perfect. I plan to improve it but wanted to get something out there to people who wanted it.
