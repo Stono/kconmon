@@ -6,7 +6,11 @@ import Logger from 'lib/logger'
 
 export type PodAgentMapper = (pod: Models.Core.IPod) => IAgent
 
-export default class KubernetesDiscovery implements IDiscovery {
+export interface IKubernetesDiscovery extends IDiscovery {
+  reconcileNodes()
+}
+
+export default class KubernetesDiscovery implements IKubernetesDiscovery {
   private client: IKubernetesClient
   private logger = new Logger('discovery')
   private podCache: { [key: string]: IAgent } = {}
@@ -113,7 +117,7 @@ export default class KubernetesDiscovery implements IDiscovery {
     }
   }
 
-  private async reconcileNodes(): Promise<void> {
+  public async reconcileNodes(): Promise<void> {
     this.logger.info('reconciling nodes from kubernetes')
     const nodes = await this.client.select<Models.Core.INode>('v1', 'Node')
     nodes.forEach((node) => {
