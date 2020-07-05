@@ -1,0 +1,20 @@
+[
+  {
+    "name": "kconmon-g88mt",
+    "nodeName": "gke-pool-20191114-b473a77c-8n7l",
+    "ip": "10.206.0.123",
+    "zone": "europe-west4-a"
+  },
+  {
+    "name": "kconmon-2qjfl",
+    "nodeName": "gke-pool-20191114-19632ad8-n7lh",
+    "ip": "10.206.4.69",
+    "zone": "europe-west4-b"
+  },
+  {
+    "name": "kconmon-2qpvp",
+    "nodeName": "gke-pool-20191114-19632ad8-de5d",
+    "ip": "10.206.3.109",
+    "zone": "europe-west4-c"
+  }
+]

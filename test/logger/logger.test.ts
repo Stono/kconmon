@@ -22,11 +22,11 @@ describe('Logger', () => {
     } catch (ex) {
       should(ex.message).eql('unknown log level: bacon')
     }
+    process.env.LOG_LEVEL = 'none'
   })
 
   it('should accept valid log levels via the environment variable', () => {
-    process.env.LOG_LEVEL = 'info'
-    const sut = new Logger('test-logger')
+    const sut = new Logger('test-logger', LogLevel.info)
     should(sut).not.be.empty()
   })
 
