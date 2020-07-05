@@ -38,7 +38,7 @@ In order to discover other agents, and enrich the agent information with metadat
 
 ### UDP Testing
 
-`kmoncon` will perform 10 x 4 byte UDP packet tests between every other agent, every 5 seconds. Each test waits for a response from the destination agent. The RTT timeout is 250ms, anything longer than that and we consider the packets lost in the abyss. The metrics output from UDP tests are:
+`kmoncon` will perform 5 x 4 byte UDP packet tests between every other agent, every 5 seconds. Each test waits for a response from the destination agent. The RTT timeout is 250ms, anything longer than that and we consider the packets lost in the abyss. The metrics output from UDP tests are:
 
 - `GAUGE kconmon_udp_duration_milliseconds`: The total RTT from sending the packet to receiving a response
 - `GAUGE kconmon_udp_duration_variance_milliseconds`: The variance between the slowest and the fastest packet

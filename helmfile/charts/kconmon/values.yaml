@@ -29,7 +29,7 @@ config:
     interval: 5000
     # This is a per-packet timeout
     timeout: 250
-    packets: 10
+    packets: 5
 
   dns:
     interval: 5000
