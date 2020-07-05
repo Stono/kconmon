@@ -6,6 +6,10 @@ The idea is this information supplements any other L7 monitoring you use, such a
 
 It's really performant, considering the number of tests it is doing, on my clusters of 75 nodes, the agents have a mere 70m CPU request.
 
+Once you've got it up and going, you can plot some pretty dashboards like this:
+
+![grafana][screenshots/grafana.png]
+
 **Known Issues**:
 
 - It's super, mega pre-alpha, the product of a weekends experimentation - so don't expect it to be perfect. I plan to improve it.
