@@ -4,8 +4,6 @@ services:
     image: stono/kconmon:${VERSION:-latest}
     build:
       context: '.'
-      cache_from:
-        - stono/kconmon:latest
       args:
         NODEJS_VERSION: 14.4.0
     command: 'node lib/apps/controller/index.js'

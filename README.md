@@ -13,7 +13,7 @@ Once you've got it up and going, you can plot some pretty dashboards like this:
 **Known Issues**:
 
 - It's super, mega pre-alpha, the product of a weekends experimentation - so don't expect it to be perfect. I plan to improve it.
-- It's written in [nodejs](https://nodejs.org/en) which means the docker image is 180mb. That's not huge, but it isn't golang small either.
+- It's written in [nodejs](https://nodejs.org/en) which means the docker image is 130mb. That's not huge, but it isn't golang small either.
 - If you've got nodes coming up and down frequently, eventual consistency means that you might get some test failures as an agent is testing a node that's gone (but is yet to get an updated agent list). I plan to tackle this with push agent updates.
 
 ## Architecture
