@@ -64,6 +64,11 @@ export default class Tester implements ITester {
       return new Promise((resolve) => setTimeout(resolve, ms))
     }
 
+    const jitter = () => {
+      const rand = Math.random() * (500 - 50)
+      return Math.floor(rand + 100)
+    }
+
     this.running = true
     let agents = await this.discovery.agents()
     const agentUpdateLoop = async () => {
@@ -76,20 +81,20 @@ export default class Tester implements ITester {
       while (this.running) {
         this.metrics.resetTCPTestResults()
         await this.runTcpTests(agents)
-        await delay(this.config.testConfig.tcp.interval)
+        await delay(this.config.testConfig.tcp.interval + jitter())
       }
     }
     const udpEventLoop = async () => {
       while (this.running) {
         this.metrics.resetUDPTestResults()
         await this.runUdpTests(agents)
-        await delay(this.config.testConfig.udp.interval)
+        await delay(this.config.testConfig.udp.interval + jitter())
       }
     }
     const dnsEventLoop = async () => {
       while (this.running) {
         await this.runDNSTests()
-        await delay(this.config.testConfig.dns.interval)
+        await delay(this.config.testConfig.dns.interval + jitter())
       }
     }
     agentUpdateLoop()
