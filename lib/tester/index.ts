@@ -74,12 +74,14 @@ export default class Tester implements ITester {
     }
     const tcpEventLoop = async () => {
       while (this.running) {
+        this.metrics.resetTCPTestResults()
         await this.runTcpTests(agents)
         await delay(this.config.testConfig.tcp.interval)
       }
     }
     const udpEventLoop = async () => {
       while (this.running) {
+        this.metrics.resetUDPTestResults()
         await this.runUdpTests(agents)
         await delay(this.config.testConfig.udp.interval)
       }

@@ -2,6 +2,8 @@ export interface IMetrics {
   handleTCPTestResult(result: ITCPTestResult)
   handleUDPTestResult(result: IUDPTestResult)
   handleDNSTestResult(result: IDNSTestResult)
+  resetTCPTestResults()
+  resetUDPTestResults()
   toString()
 }
 
@@ -89,6 +91,17 @@ export default class Metrics implements IMetrics {
     this.DNS.labels(source, result.host, result.result).inc(1)
   }
 
+  public resetTCPTestResults() {
+    this.TCPConnect.reset()
+    this.TCPDuration.reset()
+  }
+
+  public resetUDPTestResults() {
+    this.UDPDuration.reset()
+    this.UDPLoss.reset()
+    this.UDPVariance.reset()
+  }
+
   public handleUDPTestResult(result: IUDPTestResult): void {
     const source = result.source.nodeName
     const destination = result.destination.nodeName
@@ -103,9 +116,6 @@ export default class Metrics implements IMetrics {
     ).inc(1)
 
     if (result.timings) {
-      this.UDPDuration.reset()
-      this.UDPLoss.reset()
-      this.UDPVariance.reset()
       this.UDPDuration.labels(
         source,
         destination,
@@ -140,8 +150,6 @@ export default class Metrics implements IMetrics {
     ).inc(1)
 
     if (result.timings) {
-      this.TCPConnect.reset()
-      this.TCPDuration.reset()
       this.TCPConnect.labels(
         source,
         destination,
