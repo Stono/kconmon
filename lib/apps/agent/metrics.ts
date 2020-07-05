@@ -57,7 +57,7 @@ export default class Metrics implements IMetrics {
 
     this.DNS = new client.Counter<string>({
       help: 'DNS Test Results',
-      labelNames: ['source', 'host', 'result'],
+      labelNames: ['source', 'source_zone', 'host', 'result'],
       name: `${config.metricsPrefix}_dns_results_total`
     })
 
@@ -88,7 +88,9 @@ export default class Metrics implements IMetrics {
 
   public handleDNSTestResult(result: IDNSTestResult): void {
     const source = result.source.nodeName
-    this.DNS.labels(source, result.host, result.result).inc(1)
+    this.DNS.labels(source, result.source.zone, result.host, result.result).inc(
+      1
+    )
   }
 
   public resetTCPTestResults() {
