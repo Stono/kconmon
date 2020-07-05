@@ -1,11 +1,9 @@
-import * as fs from 'fs'
 export interface ILogger {
-  debug(...args)
-  info(...args)
-  log(...args)
-  warn(...args)
-  error(...args)
-  onCluster: boolean
+  debug(...args): void
+  info(...args): void
+  log(...args): void
+  warn(...args): void
+  error(...args): void
 }
 
 export enum LogLevel {
@@ -23,7 +21,6 @@ export interface IConsole {
 export default class Logger implements ILogger {
   private module: string
   private logLevel: LogLevel = LogLevel.info
-  public onCluster = false
   private writer: IConsole
 
   constructor(
@@ -33,7 +30,7 @@ export default class Logger implements ILogger {
   ) {
     this.writer = writer
     this.module = moduleName
-    const isNull = (item) => {
+    const isNull = (item): boolean => {
       return typeof item === 'undefined' || item === null
     }
     if (isNull(logLevel) && process.env.LOG_LEVEL) {
@@ -48,35 +45,32 @@ export default class Logger implements ILogger {
     }
 
     this.info = this.info.bind(this)
-    if (fs.existsSync('/var/run/secrets/kubernetes.io/serviceaccount')) {
-      this.onCluster = true
-    }
   }
 
-  debug(...args) {
+  debug(...args): void {
     this.writeLog.bind(this)(LogLevel.debug, args)
   }
-  info(...args) {
+  info(...args): void {
     this.writeLog.bind(this)(LogLevel.info, args)
   }
-  log(...args) {
+  log(...args): void {
     this.writeLog.bind(this)(LogLevel.info, args)
   }
-  warn(...args) {
+  warn(...args): void {
     this.writeLog.bind(this)(LogLevel.warn, args)
   }
-  error(...args) {
+  error(...args): void {
     this.writeLog.bind(this)(LogLevel.error, args)
   }
 
-  private writeLog(level: LogLevel, args: any[]) {
+  private writeLog(level: LogLevel, args: any[]): void {
     if (level < this.logLevel) {
       return
     }
     this.logJson(level, args)
   }
 
-  private logJson(level: LogLevel, args: any[]) {
+  private logJson(level: LogLevel, args: any[]): void {
     const stringMessages: string[] = []
     const payload: any = {
       timestamp: new Date().toISOString(),
@@ -96,18 +90,15 @@ export default class Logger implements ILogger {
             message: arg.message
           } as any
           if (arg.stack) {
-            payload.error.stack = arg.stack
+            const lines = arg.stack.split('\n', 2)
+            payload.error.stack = lines[lines.length - 1].trim()
           }
         } else {
           /* If the argument is a type object, then loop over its keys
             and add them to the payload, unless they're a reserved key
             such as timestamp, module, level or message
             */
-          Object.keys(arg).forEach((key) => {
-            if (Object.keys(payload).indexOf(key) === -1) {
-              payload[key] = arg[key]
-            }
-          })
+          Object.assign(payload, arg)
         }
         return
       }
@@ -119,11 +110,6 @@ export default class Logger implements ILogger {
       payload.message = payload.error.message
     }
 
-    if (this.onCluster) {
-      this.writer.log(JSON.stringify(payload))
-      return
-    }
-    payload.timestamp = new Date().toUTCString()
-    this.writer.log(JSON.stringify(payload, null, 2))
+    this.writer.log(JSON.stringify(payload))
   }
 }

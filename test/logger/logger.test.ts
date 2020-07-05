@@ -30,27 +30,13 @@ describe('Logger', () => {
     should(sut).not.be.empty()
   })
 
-  describe('Local', () => {
+  describe('Logging', () => {
     before(() => {
-      logger.onCluster = false
-      messageProcessor = (msg: string) => {
-        lastMessage = msg
-      }
-    })
-    it('should be human readable', () => {
-      logger.info('testing')
-      should(lastMessage).not.be.empty()
-    })
-  })
-
-  describe('On Cluster', () => {
-    before(() => {
-      logger.onCluster = true
-      messageProcessor = (msg: string) => {
+      messageProcessor = (msg: string): void => {
         lastMessage = JSON.parse(msg)
       }
     })
-    const commonTests = (level: string, message = 'testing') => {
+    const commonTests = (level: string, message = 'testing'): void => {
       should(lastMessage.level).eql(level)
       should(lastMessage.timestamp).not.be.empty()
       should(lastMessage.module).eql('test-logger')
