@@ -1,10 +1,10 @@
 # kmoncon - Monitoring connectivity between your kubernetes nodes
 
-A Kubernetes node connectivity tool that preforms frequent tests, and exposes [Prometheus](https://prometheus.io) metrics that are enriched with the node name, and the locality information (such as zone), enabling you to correlate issues between availability zones or nodes.
+A Kubernetes node connectivity tool that preforms frequent tests (tcp, udp and dns), and exposes [Prometheus](https://prometheus.io) metrics that are enriched with the node name, and the locality information (such as zone), enabling you to correlate issues between availability zones or nodes.
 
-The idea is this information supplements any other L7 monitoring you use, such as [Istio](https://istio.io/latest/docs/concepts/observability) observability, to help you get to the root cause of a problem faster.
+The idea is this information supplements any other L7 monitoring you use, such as [Istio](https://istio.io/latest/docs/concepts/observability) observability or [Kube State Metrics](https://github.com/kubernetes/kube-state-metrics), to help you get to the root cause of a problem faster.
 
-It's really performant, considering the number of tests it is doing, on my clusters of 75 nodes, the agents have a mere 70m CPU/40mb RAM resource request.
+It's really performant, considering the number of tests it is doing, on my clusters of 75 nodes, the agents have a mere 60m CPU/40mb RAM resource request.
 
 Once you've got it up and going, you can plot some pretty dashboards like this:
 
@@ -12,7 +12,7 @@ Once you've got it up and going, you can plot some pretty dashboards like this:
 
 **Known Issues**:
 
-- It's super, mega pre-alpha, the product of a weekends experimentation - so don't expect it to be perfect. I plan to improve it.
+- It's super, mega pre-alpha, the product of a weekends experimentation - so don't expect it to be perfect. I plan to improve it but wanted to get something out there to people who wanted it.
 - It's written in [nodejs](https://nodejs.org/en) which means the docker image is 130mb. That's not huge, but it isn't golang small either.
 - If you've got nodes coming up and down frequently, eventual consistency means that you might get some test failures as an agent is testing a node that's gone (but is yet to get an updated agent list). I plan to tackle this with push agent updates.
 
@@ -34,11 +34,11 @@ In order to discover other agents, and enrich the agent information with metadat
 
 ## Testing
 
-`kconmon` does a variety of different tests, and exposes the results as prometheus metrics enriched with the node and locality information.
+`kconmon` does a variety of different tests, and exposes the results as prometheus metrics enriched with the node and locality information. The interval is configurable in the [helm chart config](helmfile/charts/kconmon/values.yaml), and is subject to a 50-500ms jitter to spread the load.
 
 ### UDP Testing
 
-`kmoncon` will perform 5 x 4 byte UDP packet tests between every other agent, every 5 seconds. Each test waits for a response from the destination agent. The RTT timeout is 250ms, anything longer than that and we consider the packets lost in the abyss. The metrics output from UDP tests are:
+`kmoncon` agents by default will perform 5 x 4 byte UDP packet tests between every other agent, every 5 seconds. Each test waits for a response from the destination agent. The RTT timeout is 250ms, anything longer than that and we consider the packets lost in the abyss. The metrics output from UDP tests are:
 
 - `GAUGE kconmon_udp_duration_milliseconds`: The total RTT from sending the packet to receiving a response
 - `GAUGE kconmon_udp_duration_variance_milliseconds`: The variance between the slowest and the fastest packet
@@ -47,7 +47,7 @@ In order to discover other agents, and enrich the agent information with metadat
 
 ### TCP Testing
 
-`kmoncon` will perform a since HTTP GET request between every other agent, every 5 seconds. Each connection is terminated with `Connection: close` and [Nagle's Algorithm](https://en.wikipedia.org/wiki/Nagle%27s_algorithm) as disabled to ensure consistency across tests.
+`kmoncon` angets will perform a since HTTP GET request between every other agent, every 5 seconds. Each connection is terminated with `Connection: close` and [Nagle's Algorithm](https://en.wikipedia.org/wiki/Nagle%27s_algorithm) as disabled to ensure consistency across tests.
 
 The metrics output from TCP tests are:
 
@@ -57,7 +57,7 @@ The metrics output from TCP tests are:
 
 ### DNS Testing
 
-`kconmon` will perform DNS tests by defualt every 5 seconds. It's a good idea to have tests for a variety of different resolvers (eg kube-dns, public etc).
+`kconmon` agents will perform DNS tests by defualt every 5 seconds. It's a good idea to have tests for a variety of different resolvers (eg kube-dns, public etc).
 
 The metrics output from DNS tests are:
 
@@ -102,7 +102,7 @@ groups:
   rules:
   - alert: TCPInterZoneTestFailure
     expr: |
-      sum(increase(kconmon_fail_total{type="tcp"}[1m])) by (source_zone, destination_zone) > 0
+      sum(increase(kconmon_tcp_results_total{result="fail"}[1m])) by (source_zone, destination_zone) > 0
     labels:
       for: 2m
       severity: warning
