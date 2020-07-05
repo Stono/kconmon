@@ -10,7 +10,8 @@ import * as dns from 'dns'
 export interface ITester {
   start()
   stop()
-  runUdpTests(agents: IAgent[]): Promise<IUDPTestResult[]>
+  runUDPTests(agents: IAgent[]): Promise<IUDPTestResult[]>
+  runTCPTests(agents: IAgent[]): Promise<ITCPTestResult[]>
   runDNSTests(): Promise<IDNSTestResult[]>
 }
 
@@ -80,14 +81,14 @@ export default class Tester implements ITester {
     const tcpEventLoop = async () => {
       while (this.running) {
         this.metrics.resetTCPTestResults()
-        await this.runTcpTests(agents)
+        await this.runTCPTests(agents)
         await delay(this.config.testConfig.tcp.interval + jitter())
       }
     }
     const udpEventLoop = async () => {
       while (this.running) {
         this.metrics.resetUDPTestResults()
-        await this.runUdpTests(agents)
+        await this.runUDPTests(agents)
         await delay(this.config.testConfig.udp.interval + jitter())
       }
     }
@@ -137,7 +138,7 @@ export default class Tester implements ITester {
       .map((i) => (i as PromiseFulfilledResult<IDNSTestResult>).value)
   }
 
-  public async runUdpTests(agents: IAgent[]): Promise<IUDPTestResult[]> {
+  public async runUDPTests(agents: IAgent[]): Promise<IUDPTestResult[]> {
     agents.forEach((agent) => {
       if (!this.clients[agent.ip]) {
         this.logger.info(`new udp client created for ${agent.ip}`)
@@ -178,8 +179,8 @@ export default class Tester implements ITester {
     return results
   }
 
-  private async runTcpTests(agents: IAgent[]): Promise<void> {
-    const testAgent = async (agent: IAgent): Promise<void> => {
+  public async runTCPTests(agents: IAgent[]): Promise<ITCPTestResult[]> {
+    const testAgent = async (agent: IAgent): Promise<ITCPTestResult> => {
       try {
         const url = `http://${agent.ip}:${this.config.port}/readiness`
         const result = await this.got(url, {
@@ -192,6 +193,7 @@ export default class Tester implements ITester {
           result: 'pass'
         }
         this.metrics.handleTCPTestResult(mappedResult)
+        return mappedResult
       } catch (ex) {
         this.logger.warn(
           `test failed`,
@@ -207,9 +209,13 @@ export default class Tester implements ITester {
           result: 'fail'
         }
         this.metrics.handleTCPTestResult(failResult)
+        return failResult
       }
     }
     const promises = agents.map(testAgent)
-    await Promise.allSettled(promises)
+    const result = await Promise.allSettled(promises)
+    return result
+      .filter((r) => r.status === 'fulfilled')
+      .map((i) => (i as PromiseFulfilledResult<ITCPTestResult>).value)
   }
 }

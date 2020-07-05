@@ -39,7 +39,7 @@ export default class IndexController implements IIndexController {
     if (req.params.agent) {
       agents = agents.filter((agent) => agent.name === req.params.agent)
     }
-    const results = await this.tester.runUdpTests(agents)
+    const results = await this.tester.runUDPTests(agents)
     res.json(results)
   }
 }
