@@ -87,7 +87,7 @@ The agents expose a metric endpoint on `:8080/metrics`, which you'll need to con
     replacement: $1:8080
     target_label: __address__
   metric_relabel_configs:
-  - regex: "(instance|host|pod)"
+  - regex: "(instance|pod)"
     action: labeldrop
   - source_labels: [__name__]
     regex: "(kconmon_.*)"
