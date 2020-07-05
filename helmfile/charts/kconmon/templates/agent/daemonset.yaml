@@ -16,12 +16,19 @@ spec:
   template:
     metadata:
       annotations:
-        atcloud.io/serviceTier: "3"
         sidecar.istio.io/inject: "false"
       labels:
         app: kconmon
         component: agent
     spec:
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
+        searches:
+        - {{ .Release.Namespace }}.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
 {{ if $.Values.config.nodeAntiAffinity }}
       affinity:
         nodeAffinity:
