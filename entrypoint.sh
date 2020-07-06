@@ -2,7 +2,7 @@
 set -e
 
 if [ ! -z "$CONTAINER_RESOURCE_REQUEST_MEMORY" ]; then
-  export MAX_OLD_SPACE=$(/usr/bin/original_node -pe 'Math.round(process.env.CONTAINER_RESOURCE_REQUEST_MEMORY / 1024 / 1024 / 100 * 75)')
+  export MAX_OLD_SPACE=$(/usr/bin/node -pe 'Math.round(process.env.CONTAINER_RESOURCE_REQUEST_MEMORY / 1024 / 1024 / 100 * 75)')
   ADDITIONAL_ARGS="--max_old_space_size=$MAX_OLD_SPACE"
 fi
 
