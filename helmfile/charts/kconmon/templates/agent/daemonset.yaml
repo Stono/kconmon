@@ -109,7 +109,7 @@ spec:
         resources:
           requests:
             cpu: {{ required "Please set the agent cpu" $.Values.resources.agent.cpu }}
-            memory: 40Mi
+            memory: {{ $.Values.resources.agent.memory | default "45Mi" }}
           limits:
             memory: 128Mi
       tolerations:

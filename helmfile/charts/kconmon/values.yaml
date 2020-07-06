@@ -42,3 +42,4 @@ resources:
     # This will scale with the number of nodes in your cluster at loosely 1m per node
     # The minimum value is 25m
     cpu: 70m
+    memory: 45Mi
