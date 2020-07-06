@@ -20,11 +20,12 @@ import * as os from 'os'
 import UDPServer from 'lib/udp/server'
 import config from 'lib/config'
 import Logger from 'lib/logger'
+import UDPClientFactory from 'lib/udp/clientFactory'
 const webServer = new WebServer(config)
 const discovery = new ServiceDiscovery(config, got)
 const metrics = new Metrics(config)
 const logger = new Logger('agent')
-
+const udpClientFactory = new UDPClientFactory(config)
 const udpServer = new UDPServer(config)
 const delay = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -41,7 +42,14 @@ const delay = (ms: number) => {
     process.exit(1)
   }
   logger.info(`loaded metadata`, me)
-  const tester = new Tester(config, got, discovery, metrics, me)
+  const tester = new Tester(
+    config,
+    got,
+    discovery,
+    metrics,
+    me,
+    udpClientFactory
+  )
   const handlerInit = (app: Application): Promise<void> => {
     const indexController = new IndexController(metrics, tester, discovery)
     new IndexRoutes().applyRoutes(app, indexController)

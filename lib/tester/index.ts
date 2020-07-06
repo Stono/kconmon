@@ -2,10 +2,11 @@ import { Got } from 'got/dist/source'
 import { IDiscovery, IAgent } from 'lib/discovery'
 import { PlainResponse } from 'got/dist/source/core'
 import { IMetrics } from 'lib/apps/agent/metrics'
-import UDPClient, { IUDPClient, IUDPPingResult } from 'lib/udp/client'
+import { IUDPPingResult } from 'lib/udp/client'
 import { IConfig } from 'lib/config'
 import Logger, { ILogger } from 'lib/logger'
 import * as dns from 'dns'
+import { IUdpClientFactory as IUDPClientFactory } from 'lib/udp/clientFactory'
 
 export interface ITester {
   start()
@@ -44,21 +45,23 @@ export default class Tester implements ITester {
   private me: IAgent
   private running = false
   private config: IConfig
-  private clients: { [key: string]: IUDPClient } = {}
   private resolver = new dns.promises.Resolver()
+  private readonly udpClientFactory: IUDPClientFactory
 
   constructor(
     config: IConfig,
     got: Got,
     discovery: IDiscovery,
     metrics: IMetrics,
-    me: IAgent
+    me: IAgent,
+    udpClientFactory: IUDPClientFactory
   ) {
     this.got = got
     this.discovery = discovery
     this.metrics = metrics
     this.me = me
     this.config = config
+    this.udpClientFactory = udpClientFactory
   }
 
   public async start(): Promise<void> {
@@ -145,39 +148,37 @@ export default class Tester implements ITester {
   }
 
   public async runUDPTests(agents: IAgent[]): Promise<IUDPTestResult[]> {
-    agents.forEach((agent) => {
-      if (!this.clients[agent.ip]) {
-        this.logger.info(`new udp client created for ${agent.ip}`)
-        this.clients[agent.ip] = new UDPClient(agent.ip, this.config.port)
-      }
-    })
-    Object.keys(this.clients).forEach((ip) => {
-      const agent = agents.find((a) => a.ip === ip)
-      if (!agent) {
-        this.logger.info(`udp client removed for ${ip}`)
-        this.clients[ip].destroy()
-        delete this.clients[ip]
-      }
-    })
-
     const results: IUDPTestResult[] = []
+    this.udpClientFactory.generateClientsForAgents(agents)
+
     const testAgent = async (agent: IAgent): Promise<void> => {
-      const client = this.clients[agent.ip]
-      const result = await client.ping(
-        this.config.testConfig.udp.timeout,
-        this.config.testConfig.udp.packets
-      )
-      if (result.loss > 0) {
-        this.logger.warn('packet loss detected', result)
+      const client = this.udpClientFactory.clientFor(agent)
+      try {
+        const result = await client.ping(
+          this.config.testConfig.udp.timeout,
+          this.config.testConfig.udp.packets
+        )
+        if (result.loss > 0) {
+          this.logger.warn('packet loss detected', result)
+        }
+        const testResult: IUDPTestResult = {
+          source: this.me,
+          destination: agent,
+          timings: result,
+          result: result.loss > 0 ? 'fail' : 'pass'
+        }
+        results.push(testResult)
+        this.metrics.handleUDPTestResult(testResult)
+      } catch (ex) {
+        this.logger.error('Failed to execute UDP test', ex)
+        const testResult: IUDPTestResult = {
+          source: this.me,
+          destination: agent,
+          result: 'fail'
+        }
+        results.push(testResult)
+        this.metrics.handleUDPTestResult(testResult)
       }
-      const testResult: IUDPTestResult = {
-        source: this.me,
-        destination: agent,
-        timings: result,
-        result: result.loss > 0 ? 'fail' : 'pass'
-      }
-      results.push(testResult)
-      this.metrics.handleUDPTestResult(testResult)
     }
     const promises = agents.map(testAgent)
     await Promise.allSettled(promises)

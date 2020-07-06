@@ -4,32 +4,31 @@ import { IConfig } from 'lib/config'
 import { IDiscovery, IAgent } from 'lib/discovery'
 import { IMetrics } from 'lib/apps/agent/metrics'
 import * as should from 'should'
-import UDPServer, { IUDPServer } from 'lib/udp/server'
 import { Got } from 'got/dist/source'
+import { IUdpClientFactory } from 'lib/udp/clientFactory'
+import { IUDPClient, IUDPPingResult } from 'lib/udp/client'
 
 describe('Tester', () => {
   let sut: ITester
   let config: IConfig
-  let udpserver: IUDPServer
   let got: Got
+  let udpClientFactory: IUdpClientFactory
+
   before(async () => {
     config = td.object<IConfig>()
     config.testConfig.udp.timeout = 500
     config.testConfig.udp.packets = 1
     config.testConfig.tcp.timeout = 500
     config.port = 8080
-    udpserver = new UDPServer(config)
-    await udpserver.start()
   })
+
   beforeEach(async () => {
     const discovery = td.object<IDiscovery>()
     const metrics = td.object<IMetrics>()
     const me = td.object<IAgent>()
     got = td.function<Got>()
-    sut = new Tester(config, got, discovery, metrics, me)
-  })
-  after(async () => {
-    await udpserver.stop()
+    udpClientFactory = td.object<IUdpClientFactory>()
+    sut = new Tester(config, got, discovery, metrics, me, udpClientFactory)
   })
 
   it('should do a dns test', async () => {
@@ -39,13 +38,45 @@ describe('Tester', () => {
   })
 
   it('should do a udp test', async () => {
+    const udpClient = td.object<IUDPClient>()
+    const udpPingResult = td.object<IUDPPingResult>()
+    udpPingResult.success = true
+    td.when(
+      udpClient.ping(
+        config.testConfig.udp.timeout,
+        config.testConfig.udp.packets
+      )
+    ).thenResolve(udpPingResult)
     const agent = td.object<IAgent>()
     agent.ip = '127.0.0.1'
     agent.name = 'local'
     agent.nodeName = 'some-node'
     agent.zone = 'some-zone'
+    td.when(udpClientFactory.clientFor(agent)).thenReturn(udpClient)
+
     const result = await sut.runUDPTests([agent])
     should(result[0].result).eql('pass')
+  })
+
+  it('should should capture a failed ping as an error', async () => {
+    const udpClient = td.object<IUDPClient>()
+    const udpPingResult = td.object<IUDPPingResult>()
+    udpPingResult.success = true
+    td.when(
+      udpClient.ping(
+        config.testConfig.udp.timeout,
+        config.testConfig.udp.packets
+      )
+    ).thenReject(new Error('boom'))
+    const agent = td.object<IAgent>()
+    agent.ip = '127.0.0.1'
+    agent.name = 'local'
+    agent.nodeName = 'some-node'
+    agent.zone = 'some-zone'
+    td.when(udpClientFactory.clientFor(agent)).thenReturn(udpClient)
+
+    const result = await sut.runUDPTests([agent])
+    should(result[0].result).eql('fail')
   })
 
   it('should do a tcp test', async () => {
