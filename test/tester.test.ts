@@ -58,7 +58,7 @@ describe('Tester', () => {
     should(result[0].result).eql('pass')
   })
 
-  it('should should capture a failed ping as an error', async () => {
+  it('should should capture a failed ping as an fail', async () => {
     const udpClient = td.object<IUDPClient>()
     const udpPingResult = td.object<IUDPPingResult>()
     udpPingResult.success = true
@@ -91,5 +91,33 @@ describe('Tester', () => {
     agent.zone = 'some-zone'
     const result = await sut.runTCPTests([agent])
     should(result[0].result).eql('pass')
+  })
+
+  it('should capture a 5xx code as a fail', async () => {
+    td.when(
+      got('http://127.0.0.1:8080/readiness', { timeout: 500 })
+    ).thenResolve({ statusCode: 500 })
+
+    const agent = td.object<IAgent>()
+    agent.ip = '127.0.0.1'
+    agent.name = 'local'
+    agent.nodeName = 'some-node'
+    agent.zone = 'some-zone'
+    const result = await sut.runTCPTests([agent])
+    should(result[0].result).eql('fail')
+  })
+
+  it('should capture a failed tcp test as a fail', async () => {
+    td.when(
+      got('http://127.0.0.1:8080/readiness', { timeout: 500 })
+    ).thenReject(new Error('boom'))
+
+    const agent = td.object<IAgent>()
+    agent.ip = '127.0.0.1'
+    agent.name = 'local'
+    agent.nodeName = 'some-node'
+    agent.zone = 'some-zone'
+    const result = await sut.runTCPTests([agent])
+    should(result[0].result).eql('fail')
   })
 })

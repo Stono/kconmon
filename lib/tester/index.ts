@@ -197,7 +197,7 @@ export default class Tester implements ITester {
           source: this.me,
           destination: agent,
           timings: result.timings,
-          result: 'pass'
+          result: result.statusCode === 200 ? 'pass' : 'fail'
         }
         this.metrics.handleTCPTestResult(mappedResult)
         return mappedResult
