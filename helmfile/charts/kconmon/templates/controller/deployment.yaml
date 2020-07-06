@@ -39,7 +39,6 @@ spec:
         image: "{{ required "Please specify the docker image" .Values.docker.image }}:{{ .Values.docker.tag | default .Chart.Version }}"
         imagePullPolicy: IfNotPresent
         args:
-        - /usr/local/bin/entrypoint.sh
         - controller
         env:
         - name: CONTAINER_RESOURCE_REQUEST_MEMORY
