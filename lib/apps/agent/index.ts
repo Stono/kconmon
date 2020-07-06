@@ -57,12 +57,13 @@ const delay = (ms: number) => {
   }
   await webServer.start(handlerInit)
   await tester.start()
+  logger.info('agent started successfully')
 
   async function shutdown() {
     const shutdownPeriod = 7500
-    logger.info('stopping tester')
+    logger.info(`stopping agent, will exit in ${shutdownPeriod}ms`)
     await tester.stop()
-    logger.info(`shutting down web and udp server in ${shutdownPeriod}ms`)
+    await discovery.stop()
     setTimeout(async () => {
       await udpServer.stop()
       await webServer.stop()
@@ -74,7 +75,6 @@ const delay = (ms: number) => {
 
   process.on('SIGINT', shutdown)
   process.on('SIGTERM', shutdown)
-
   process.on('unhandledRejection', (error) => {
     console.error('Unhandled Rejection!')
     console.error(error)

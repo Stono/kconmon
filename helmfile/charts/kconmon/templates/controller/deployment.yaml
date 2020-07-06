@@ -25,6 +25,7 @@ spec:
         app: kconmon
         component: controller
     spec:
+      terminationGracePeriodSeconds: 15
       dnsConfig:
         options:
         - name: ndots
@@ -32,7 +33,7 @@ spec:
         searches:
         - {{ .Release.Namespace }}.svc.cluster.local
         - svc.cluster.local
-        - cluster.loca
+        - cluster.local
       serviceAccountName: kconmon
       containers:
       - name: agent

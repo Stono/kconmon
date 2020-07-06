@@ -21,6 +21,7 @@ spec:
         app: kconmon
         component: agent
     spec:
+      terminationGracePeriodSeconds: 15
       dnsConfig:
         options:
         - name: ndots
