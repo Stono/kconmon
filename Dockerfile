@@ -10,6 +10,9 @@ RUN ./node_modules/.bin/grunt test
 RUN ./node_modules/.bin/grunt build
 
 FROM mhart/alpine-node:${NODEJS_VERSION} as deploy
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
+
 WORKDIR /app
 RUN addgroup nonroot && \
     adduser -D nonroot -G nonroot && \
