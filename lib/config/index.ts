@@ -28,6 +28,17 @@ interface ITestConfiguration {
     interval: number
     hosts: string[]
   }
+  icmp: {
+    interval: number
+    count: number
+    timeout: number
+    hosts: string[]
+  }
+  custom_tcp: {
+    interval: number
+    timeout: number
+    hosts: string[]
+  }
 }
 
 export interface IConfig {
@@ -60,7 +71,9 @@ export class Config implements IConfig {
   public readonly testConfig: ITestConfiguration = {
     tcp: getEnv('tcp', { interval: 5000, timeout: 1000 }),
     udp: getEnv('udp', { interval: 5000, timeout: 250, packets: 10 }),
-    dns: getEnv('dns', { interval: 5000, hosts: [] })
+    dns: getEnv('dns', { interval: 5000, hosts: [] }),
+    icmp: getEnv('icmp', { interval: 5000, hosts: [] }),
+    custom_tcp: getEnv('custom_tcp', { interval: 5000, timeout: 1000, hosts: [] })
   }
 }
 

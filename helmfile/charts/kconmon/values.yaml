@@ -1,8 +1,9 @@
 docker:
-  image: stono/kconmon
+  image: barto92/kubemon
+  tag: 1.0.30
 
 # Should we run an initContainer that enables core tcp connection setting tweaks
-enableTcpTweaks: true
+enableTcpTweaks: false
 
 config:
   # What port should the server listen on
@@ -36,6 +37,21 @@ config:
     hosts:
       - www.google.com
       - kubernetes.default.svc.cluster.local
+  
+  icmp:
+    interval: 5000
+    count: 2
+    timeout: 5
+    hosts:
+      - www.telekom.de
+      - www.google.com
+      - 8.8.4.4
+  custom_tcp:
+    interval: 5000
+    timeout: 1000
+    hosts:
+      - www.telekom.de
+      - www.google.de
 
 resources:
   agent:

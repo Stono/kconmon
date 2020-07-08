@@ -18,7 +18,11 @@ RUN addgroup nonroot && \
     adduser -D nonroot -G nonroot && \
     chown nonroot:nonroot /app
 
+RUN apk update && \
+    apk add --no-cache iputils
+
 USER nonroot
+
 RUN mkdir -p /home/nonroot/.npm
 VOLUME /home/nonroot/.npm
 COPY package.json ./
