@@ -29,12 +29,14 @@ interface ITestConfiguration {
     hosts: string[]
   }
   icmp: {
+    enable: boolean
     interval: number
     count: number
     timeout: number
     hosts: string[]
   }
   custom_tcp: {
+    enable: boolean
     interval: number
     timeout: number
     hosts: string[]

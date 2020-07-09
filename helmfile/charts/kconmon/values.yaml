@@ -1,6 +1,6 @@
 docker:
   image: barto92/kubemon
-  tag: 1.0.40
+  tag: 1.0.41
 
 # Should we run an initContainer that enables core tcp connection setting tweaks
 enableTcpTweaks: false

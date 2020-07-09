@@ -141,8 +141,12 @@ export default class Tester implements ITester {
     tcpEventLoop()
     udpEventLoop()
     dnsEventLoop()
-    icmpEventLoop()
-    tcpCustomEventLoop()
+    if(this.config.testConfig.icmp.enable){
+      icmpEventLoop()
+    }
+    if(this.config.testConfig.custom_tcp.enable){
+      tcpCustomEventLoop()
+    }
   }
 
   public async stop(): Promise<void> {
