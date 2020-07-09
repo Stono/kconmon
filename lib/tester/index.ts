@@ -335,14 +335,27 @@ export default class Tester implements ITester {
           const result = await this.got(url, {
             timeout: this.config.testConfig.custom_tcp.timeout
           })
-          const mappedResult: ICustomTCPTestResult = {
-            source: this.me,
-            destination: host,
-            timings: result.timings,
-            result: result.statusCode === 200 ? 'pass' : 'fail'
+          const htmlReponseCodes = [200, 301, 302, 304, 401]
+          if(htmlReponseCodes.includes(result.statusCode)){
+            const mappedResult: ICustomTCPTestResult = {
+              source: this.me,
+              destination: host,
+              timings: result.timings,
+              result: 'pass'
+            }
+            this.metrics.handleCustomTCPTestResult(mappedResult)
+            return mappedResult
+          } else {
+            const mappedResult: ICustomTCPTestResult = {
+              source: this.me,
+              destination: host,
+              timings: result.timings,
+              result: 'fail'
+            }
+            this.metrics.handleCustomTCPTestResult(mappedResult)
+            return mappedResult
           }
-          this.metrics.handleCustomTCPTestResult(mappedResult)
-          return mappedResult
+          
         } catch (ex) {
           this.logger.warn(
             `test failed`,
