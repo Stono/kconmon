@@ -11,7 +11,13 @@ export interface IMetrics {
 }
 
 import * as client from 'prom-client'
-import { IICMPTestResult, IUDPTestResult, IDNSTestResult, ITCPTestResult, ICustomTCPTestResult } from 'lib/tester'
+import {
+  IICMPTestResult,
+  IUDPTestResult,
+  IDNSTestResult,
+  ITCPTestResult,
+  ICustomTCPTestResult
+} from 'lib/tester'
 import { IConfig } from 'lib/config'
 
 export default class Metrics implements IMetrics {
@@ -158,14 +164,16 @@ export default class Metrics implements IMetrics {
       labelNames: ['source', 'destination', 'source_zone', 'destination_zone'],
       name: `${config.metricsPrefix}_custom_tcp_duration_milliseconds`
     })
-
   }
 
   public handleICMPTestResult(result: IICMPTestResult): void {
     const source = result.source.nodeName
-    this.ICMP.labels(source, result.source.zone, result.host, result.result).inc(
-      1
-    )
+    this.ICMP.labels(
+      source,
+      result.source.zone,
+      result.host,
+      result.result
+    ).inc(1)
     this.ICMPDuration.labels(
       result.source.nodeName,
       result.source.zone,
@@ -177,7 +185,7 @@ export default class Metrics implements IMetrics {
       result.source.zone,
       result.host
     ).set(result.avg)
-    
+
     this.ICMPStddv.labels(
       result.source.nodeName,
       result.source.zone,

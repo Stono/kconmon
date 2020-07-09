@@ -1,7 +1,7 @@
 version: '3.2'
 services:
   controller:
-    image: barto92/kubemon:${VERSION:-latest}
+    image: stono/kconmon:${VERSION:-latest}
     build:
       context: '.'
       args:
@@ -24,7 +24,7 @@ services:
       - ~/.kube:/home/nonroot/.kube:ro
 
   agent:
-    image: barto92/kubemon:${VERSION:-latest}
+    image: stono/kconmon:${VERSION:-latest}
     command: 'agent'
     environment:
       PORT: '80' # Run on port 80 locally in docker-compose to replicate kubernetes service object port magenting
