@@ -44,6 +44,9 @@ describe('Tester', () => {
 
   it('should do a custom tcp test', async () => {
     config.testConfig.custom_tcp.hosts = ['www.google.com']
+    td.when(
+      got('http://www.google.com', { timeout: 500 })
+    ).thenResolve({ statusCode: 200 })
     const result = await sut.runCustomTCPTests()
     should(result[0].result).eql('pass')
   })
