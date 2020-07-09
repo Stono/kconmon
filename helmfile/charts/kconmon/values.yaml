@@ -49,8 +49,8 @@ config:
       - www.google.com
       - 8.8.4.4
 
-# Custom TCP tests configuration
-  custom_tcp:
+# Custom HTTP tests configuration
+  custom_http:
     enable: true
     interval: 5000
     timeout: 1000

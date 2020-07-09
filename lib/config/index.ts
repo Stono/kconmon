@@ -35,7 +35,7 @@ interface ITestConfiguration {
     timeout: number
     hosts: string[]
   }
-  custom_tcp: {
+  custom_http: {
     enable: boolean
     interval: number
     timeout: number
@@ -75,7 +75,11 @@ export class Config implements IConfig {
     udp: getEnv('udp', { interval: 5000, timeout: 250, packets: 10 }),
     dns: getEnv('dns', { interval: 5000, hosts: [] }),
     icmp: getEnv('icmp', { interval: 5000, hosts: [] }),
-    custom_tcp: getEnv('custom_tcp', { interval: 5000, timeout: 1000, hosts: [] })
+    custom_http: getEnv('custom_http', {
+      interval: 5000,
+      timeout: 1000,
+      hosts: []
+    })
   }
 }
 

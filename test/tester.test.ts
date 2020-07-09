@@ -19,8 +19,8 @@ describe('Tester', () => {
     config.testConfig.udp.timeout = 500
     config.testConfig.udp.packets = 1
     config.testConfig.tcp.timeout = 500
-    config.testConfig.custom_tcp.enable = true
-    config.testConfig.custom_tcp.timeout = 500
+    config.testConfig.custom_http.enable = true
+    config.testConfig.custom_http.timeout = 500
     config.testConfig.icmp.enable = true
     config.testConfig.icmp.count = 2
     config.testConfig.icmp.timeout = 5
@@ -43,11 +43,11 @@ describe('Tester', () => {
   })
 
   it('should do a custom tcp test', async () => {
-    config.testConfig.custom_tcp.hosts = ['www.google.com']
-    td.when(
-      got('http://www.google.com', { timeout: 500 })
-    ).thenResolve({ statusCode: 200 })
-    const result = await sut.runCustomTCPTests()
+    config.testConfig.custom_http.hosts = ['www.google.com']
+    td.when(got('http://www.google.com', { timeout: 500 })).thenResolve({
+      statusCode: 200
+    })
+    const result = await sut.runCustomHTTPTests()
     should(result[0].result).eql('pass')
   })
 

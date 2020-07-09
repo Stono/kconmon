@@ -1,11 +1,11 @@
 export interface IMetrics {
   handleTCPTestResult(result: ITCPTestResult)
-  handleCustomTCPTestResult(result: ICustomTCPTestResult)
+  handleCustomHTTPTestResult(result: ICustomHTTPTestResult)
   handleUDPTestResult(result: IUDPTestResult)
   handleDNSTestResult(result: IDNSTestResult)
   handleICMPTestResult(result: IICMPTestResult)
   resetTCPTestResults()
-  resetCustomTCPTestResults()
+  resetCustomHTTPTestResults()
   resetUDPTestResults()
   toString()
 }
@@ -16,7 +16,7 @@ import {
   IUDPTestResult,
   IDNSTestResult,
   ITCPTestResult,
-  ICustomTCPTestResult
+  ICustomHTTPTestResult
 } from 'lib/tester'
 import { IConfig } from 'lib/config'
 
@@ -39,9 +39,9 @@ export default class Metrics implements IMetrics {
   private ICMPStddv: client.Gauge<string>
   private ICMPLoss: client.Gauge<string>
 
-  private CustomTCP: client.Counter<string>
-  private CustomTCPDuration: client.Gauge<string>
-  private CustomTCPConnect: client.Gauge<string>
+  private CustomHTTP: client.Counter<string>
+  private CustomHTTPDuration: client.Gauge<string>
+  private CustomHTTPConnect: client.Gauge<string>
 
   constructor(config: IConfig) {
     client.register.clear()
@@ -141,7 +141,7 @@ export default class Metrics implements IMetrics {
       name: `${config.metricsPrefix}_tcp_results_total`
     })
 
-    this.CustomTCP = new client.Counter<string>({
+    this.CustomHTTP = new client.Counter<string>({
       help: 'Custom TCP Test Results',
       labelNames: [
         'source',
@@ -150,19 +150,19 @@ export default class Metrics implements IMetrics {
         'destination_zone',
         'result'
       ],
-      name: `${config.metricsPrefix}_custom_tcp_results_total`
+      name: `${config.metricsPrefix}_custom_http_results_total`
     })
 
-    this.CustomTCPConnect = new client.Gauge<string>({
+    this.CustomHTTPConnect = new client.Gauge<string>({
       help: 'Time taken to establish the TCP socket for custom test',
       labelNames: ['source', 'destination', 'source_zone', 'destination_zone'],
-      name: `${config.metricsPrefix}_custom_tcp_connect_milliseconds`
+      name: `${config.metricsPrefix}_custom_http_connect_milliseconds`
     })
 
-    this.CustomTCPDuration = new client.Gauge<string>({
+    this.CustomHTTPDuration = new client.Gauge<string>({
       help: 'Total time taken to complete the custom TCP test',
       labelNames: ['source', 'destination', 'source_zone', 'destination_zone'],
-      name: `${config.metricsPrefix}_custom_tcp_duration_milliseconds`
+      name: `${config.metricsPrefix}_custom_http_duration_milliseconds`
     })
   }
 
@@ -289,12 +289,12 @@ export default class Metrics implements IMetrics {
     }
   }
 
-  public handleCustomTCPTestResult(result: ICustomTCPTestResult): void {
+  public handleCustomHTTPTestResult(result: ICustomHTTPTestResult): void {
     const source = result.source.nodeName
     const destination = result.destination
     const sourceZone = result.source.zone
     const destinationZone = result.destination
-    this.CustomTCP.labels(
+    this.CustomHTTP.labels(
       source,
       destination,
       sourceZone,
@@ -303,7 +303,7 @@ export default class Metrics implements IMetrics {
     ).inc(1)
 
     if (result.timings) {
-      this.CustomTCPConnect.labels(
+      this.CustomHTTPConnect.labels(
         source,
         destination,
         sourceZone,
@@ -313,7 +313,7 @@ export default class Metrics implements IMetrics {
           result.timings.socket ||
           result.timings.start) - result.timings.start) as number
       )
-      this.CustomTCPDuration.labels(
+      this.CustomHTTPDuration.labels(
         source,
         destination,
         sourceZone,
@@ -322,9 +322,9 @@ export default class Metrics implements IMetrics {
     }
   }
 
-  public resetCustomTCPTestResults() {
-    this.CustomTCPConnect.reset()
-    this.CustomTCPDuration.reset()
+  public resetCustomHTTPTestResults() {
+    this.CustomHTTPConnect.reset()
+    this.CustomHTTPDuration.reset()
   }
 
   public toString(): string {

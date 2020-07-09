@@ -16,7 +16,7 @@ export interface ITester {
   runTCPTests(agents: IAgent[]): Promise<ITCPTestResult[]>
   runDNSTests(): Promise<IDNSTestResult[]>
   runICMPTests(): Promise<IICMPTestResult[]>
-  runCustomTCPTests(): Promise<ICustomTCPTestResult[]>
+  runCustomHTTPTests(): Promise<ICustomHTTPTestResult[]>
 }
 
 interface ITestResult {
@@ -50,7 +50,7 @@ export interface ITCPTestResult extends ITestResult {
   timings?: PlainResponse['timings']
 }
 
-export interface ICustomTCPTestResult {
+export interface ICustomHTTPTestResult {
   source: IAgent
   destination: string
   result: 'pass' | 'fail'
@@ -131,9 +131,9 @@ export default class Tester implements ITester {
     }
     const tcpCustomEventLoop = async () => {
       while (this.running) {
-        this.metrics.resetCustomTCPTestResults()
-        await this.runCustomTCPTests()
-        await delay(this.config.testConfig.custom_tcp.interval + jitter())
+        this.metrics.resetCustomHTTPTestResults()
+        await this.runCustomHTTPTests()
+        await delay(this.config.testConfig.custom_http.interval + jitter())
       }
     }
 
@@ -144,7 +144,7 @@ export default class Tester implements ITester {
     if (this.config.testConfig.icmp.enable) {
       icmpEventLoop()
     }
-    if (this.config.testConfig.custom_tcp.enable) {
+    if (this.config.testConfig.custom_http.enable) {
       tcpCustomEventLoop()
     }
   }
@@ -326,32 +326,32 @@ export default class Tester implements ITester {
       .map((i) => (i as PromiseFulfilledResult<ITCPTestResult>).value)
   }
 
-  public async runCustomTCPTests(): Promise<ICustomTCPTestResult[]> {
-    const promises = this.config.testConfig.custom_tcp.hosts.map(
-      async (host): Promise<ICustomTCPTestResult> => {
+  public async runCustomHTTPTests(): Promise<ICustomHTTPTestResult[]> {
+    const promises = this.config.testConfig.custom_http.hosts.map(
+      async (host): Promise<ICustomHTTPTestResult> => {
         try {
           const url = `http://${host}`
           const result = await this.got(url, {
-            timeout: this.config.testConfig.custom_tcp.timeout
+            timeout: this.config.testConfig.custom_http.timeout
           })
           const htmlReponseCodes = [200, 301, 302, 304, 401]
           if (htmlReponseCodes.includes(result.statusCode)) {
-            const mappedResult: ICustomTCPTestResult = {
+            const mappedResult: ICustomHTTPTestResult = {
               source: this.me,
               destination: host,
               timings: result.timings,
               result: 'pass'
             }
-            this.metrics.handleCustomTCPTestResult(mappedResult)
+            this.metrics.handleCustomHTTPTestResult(mappedResult)
             return mappedResult
           } else {
-            const mappedResult: ICustomTCPTestResult = {
+            const mappedResult: ICustomHTTPTestResult = {
               source: this.me,
               destination: host,
               timings: result.timings,
               result: 'fail'
             }
-            this.metrics.handleCustomTCPTestResult(mappedResult)
+            this.metrics.handleCustomHTTPTestResult(mappedResult)
             return mappedResult
           }
         } catch (ex) {
@@ -363,12 +363,12 @@ export default class Tester implements ITester {
             },
             ex
           )
-          const failResult: ICustomTCPTestResult = {
+          const failResult: ICustomHTTPTestResult = {
             source: this.me,
             destination: host,
             result: 'fail'
           }
-          this.metrics.handleCustomTCPTestResult(failResult)
+          this.metrics.handleCustomHTTPTestResult(failResult)
           return failResult
         }
       }
@@ -377,6 +377,6 @@ export default class Tester implements ITester {
     const result = await Promise.allSettled(promises)
     return result
       .filter((r) => r.status === 'fulfilled')
-      .map((i) => (i as PromiseFulfilledResult<ICustomTCPTestResult>).value)
+      .map((i) => (i as PromiseFulfilledResult<ICustomHTTPTestResult>).value)
   }
 }
