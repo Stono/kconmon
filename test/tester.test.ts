@@ -42,7 +42,7 @@ describe('Tester', () => {
     should(result[0].result).eql('pass')
   })
 
-  it('should do a custom tcp test', async () => {
+  it('should do a custom http test', async () => {
     config.testConfig.custom_http.hosts = ['www.google.com']
     td.when(got('http://www.google.com', { timeout: 500 })).thenResolve({
       statusCode: 200

@@ -129,7 +129,7 @@ export default class Tester implements ITester {
         await delay(this.config.testConfig.icmp.interval + jitter())
       }
     }
-    const tcpCustomEventLoop = async () => {
+    const httpCustomEventLoop = async () => {
       while (this.running) {
         this.metrics.resetCustomHTTPTestResults()
         await this.runCustomHTTPTests()
@@ -145,7 +145,7 @@ export default class Tester implements ITester {
       icmpEventLoop()
     }
     if (this.config.testConfig.custom_http.enable) {
-      tcpCustomEventLoop()
+      httpCustomEventLoop()
     }
   }
 
