@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+{{ include "kconmon.app.labels.standard" . | indent 4 }}
+    app: kconmon
+    component: agent
+  name: agent
+spec:
+  ports:
+  - name: http-web
+    port: 8080
+    protocol: TCP
+    targetPort: http-web
+  selector:
+    app: kconmon
+    component: agent
+  sessionAffinity: None
+  type: ClusterIP
