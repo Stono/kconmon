@@ -95,6 +95,8 @@ The agents expose a metric endpoint on `:8080/metrics`, which you'll need to con
     action: keep
 ```
 
+Your other option if you're using the prometheus operator, is to install the helm chart with `--set prometheus.enableServiceMonitor=true`.  This will create you a `Service` and a `ServiceMonitor`.
+
 ### Alerting
 
 You could configure some alerts too, like this one which fires when we have consistent TCP test failures between zones for 2 minutes:
