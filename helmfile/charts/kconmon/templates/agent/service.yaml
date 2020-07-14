@@ -1,9 +1,9 @@
+{{ if .Values.prometheus.enableServiceMonitor }}
 apiVersion: v1
 kind: Service
 metadata:
   labels:
 {{ include "kconmon.app.labels.standard" . | indent 4 }}
-    app: kconmon
     component: agent
   name: agent
 spec:
@@ -17,3 +17,4 @@ spec:
     component: agent
   sessionAffinity: None
   type: ClusterIP
+{{ end }}

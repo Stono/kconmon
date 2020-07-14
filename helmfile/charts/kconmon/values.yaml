@@ -43,3 +43,7 @@ resources:
     # The minimum value is 25m
     cpu: 70m
     memory: 45Mi
+
+prometheus:
+  # If you wish to create a service and a service monitor because you're using the prometheus operator, change this to true
+  enableServiceMonitor: false
