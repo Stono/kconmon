@@ -61,7 +61,6 @@ spec:
           sysctl -w net.ipv4.tcp_max_syn_backlog=3240000
           sysctl -w net.ipv4.tcp_timestamps=0
           sysctl -w net.ipv4.tcp_sack=0
-          sysctl -w net.ipv4.tcp_fack=0
         imagePullPolicy: IfNotPresent
         image: "{{ required "Please specify the docker image" .Values.docker.image }}:{{ .Values.docker.tag | default .Chart.Version }}"
         securityContext:

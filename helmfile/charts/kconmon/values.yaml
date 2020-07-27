@@ -2,6 +2,7 @@ docker:
   image: stono/kconmon
 
 # Should we run an initContainer that enables core tcp connection setting tweaks
+# Note: This requires kernel 4+
 enableTcpTweaks: true
 
 config:
