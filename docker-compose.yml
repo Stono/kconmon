@@ -5,7 +5,7 @@ services:
     build:
       context: '.'
       args:
-        NODEJS_VERSION: 14.4.0
+        NODEJS_VERSION: 14.6.0
     command: 'controller'
     environment:
       PORT: '80' # Run on port 80 locally in docker-compose to replicate kubernetes service object port magenting
