@@ -43,7 +43,6 @@ spec:
                 - "{{ $object.value }}"
 {{ end }}
 {{ end }}
-      terminationGracePeriodSeconds: 20
 
 {{ if $.Values.enableTcpTweaks }}
       initContainers:
