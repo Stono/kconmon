@@ -35,7 +35,8 @@ const mochaConfig = {
 
 const eslintConfig = {
   options: {
-    configFile: '.eslintrc.js'
+    configFile: '.eslintrc.js',
+    fix: true
   },
   target: config.targets.ts
 }

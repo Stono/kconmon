@@ -19,6 +19,11 @@ describe('Tester', () => {
     config.testConfig.udp.timeout = 500
     config.testConfig.udp.packets = 1
     config.testConfig.tcp.timeout = 500
+    config.testConfig.custom_http.enable = true
+    config.testConfig.custom_http.timeout = 500
+    config.testConfig.icmp.enable = true
+    config.testConfig.icmp.count = 2
+    config.testConfig.icmp.timeout = 5
     config.port = 8080
   })
 
@@ -29,6 +34,21 @@ describe('Tester', () => {
     got = td.function<Got>()
     udpClientFactory = td.object<IUdpClientFactory>()
     sut = new Tester(config, got, discovery, metrics, me, udpClientFactory)
+  })
+
+  it('should do a icmp test', async () => {
+    config.testConfig.icmp.hosts = ['www.google.com']
+    const result = await sut.runICMPTests()
+    should(result[0].result).eql('pass')
+  })
+
+  it('should do a custom http test', async () => {
+    config.testConfig.custom_http.hosts = ['www.google.com']
+    td.when(got('http://www.google.com', { timeout: 500 })).thenResolve({
+      statusCode: 200
+    })
+    const result = await sut.runCustomHTTPTests()
+    should(result[0].result).eql('pass')
   })
 
   it('should do a dns test', async () => {

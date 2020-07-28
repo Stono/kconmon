@@ -1,5 +1,6 @@
 docker:
   image: stono/kconmon
+  tag: latest
 
 # Should we run an initContainer that enables core tcp connection setting tweaks
 # Note: This requires kernel 4+
@@ -37,6 +38,26 @@ config:
     hosts:
       - www.google.com
       - kubernetes.default.svc.cluster.local
+
+# ICMP Test configuration
+  icmp:
+    enable: true
+    interval: 5000
+    count: 2
+    timeout: 5
+    hosts:
+      - www.telekom.de
+      - www.google.com
+      - 8.8.4.4
+
+# Custom HTTP tests configuration
+  custom_http:
+    enable: true
+    interval: 5000
+    timeout: 1000
+    hosts:
+      - www.telekom.de
+      - www.google.de
 
 resources:
   agent:

@@ -7,6 +7,7 @@ import { IConfig } from 'lib/config'
 import Logger, { ILogger } from 'lib/logger'
 import * as dns from 'dns'
 import { IUdpClientFactory as IUDPClientFactory } from 'lib/udp/clientFactory'
+import * as ping from 'ping'
 
 export interface ITester {
   start()
@@ -14,6 +15,8 @@ export interface ITester {
   runUDPTests(agents: IAgent[]): Promise<IUDPTestResult[]>
   runTCPTests(agents: IAgent[]): Promise<ITCPTestResult[]>
   runDNSTests(): Promise<IDNSTestResult[]>
+  runICMPTests(): Promise<IICMPTestResult[]>
+  runCustomHTTPTests(): Promise<ICustomHTTPTestResult[]>
 }
 
 interface ITestResult {
@@ -29,11 +32,28 @@ export interface IDNSTestResult {
   result: 'pass' | 'fail'
 }
 
+export interface IICMPTestResult {
+  source: IAgent
+  host: string
+  duration: number
+  avg: number
+  stddev: number
+  loss: number
+  result: 'pass' | 'fail'
+}
+
 export interface IUDPTestResult extends ITestResult {
   timings?: IUDPPingResult
 }
 
 export interface ITCPTestResult extends ITestResult {
+  timings?: PlainResponse['timings']
+}
+
+export interface ICustomHTTPTestResult {
+  source: IAgent
+  destination: string
+  result: 'pass' | 'fail'
   timings?: PlainResponse['timings']
 }
 
@@ -46,6 +66,7 @@ export default class Tester implements ITester {
   private running = false
   private config: IConfig
   private resolver = new dns.promises.Resolver()
+  // private ping: pingman
   private readonly udpClientFactory: IUDPClientFactory
 
   constructor(
@@ -102,14 +123,93 @@ export default class Tester implements ITester {
         await delay(this.config.testConfig.dns.interval + jitter())
       }
     }
+    const icmpEventLoop = async () => {
+      while (this.running) {
+        await this.runICMPTests()
+        await delay(this.config.testConfig.icmp.interval + jitter())
+      }
+    }
+    const httpCustomEventLoop = async () => {
+      while (this.running) {
+        this.metrics.resetCustomHTTPTestResults()
+        await this.runCustomHTTPTests()
+        await delay(this.config.testConfig.custom_http.interval + jitter())
+      }
+    }
+
     agentUpdateLoop()
     tcpEventLoop()
     udpEventLoop()
     dnsEventLoop()
+    if (this.config.testConfig.icmp.enable) {
+      icmpEventLoop()
+    }
+    if (this.config.testConfig.custom_http.enable) {
+      httpCustomEventLoop()
+    }
   }
 
   public async stop(): Promise<void> {
     this.running = false
+  }
+
+  public async runICMPTests(): Promise<IICMPTestResult[]> {
+    const promises = this.config.testConfig.icmp.hosts.map(
+      async (host): Promise<IICMPTestResult> => {
+        const hrstart = process.hrtime()
+        try {
+          const result = await ping.promise.probe(host, {
+            timeout: this.config.testConfig.icmp.timeout,
+            extra: ['-c', this.config.testConfig.icmp.count]
+          })
+          const hrend = process.hrtime(hrstart)
+
+          if (result.alive) {
+            const mapped: IICMPTestResult = {
+              source: this.me,
+              host,
+              duration: hrend[1] / 1000000,
+              avg: parseFloat(result.avg),
+              stddev: parseFloat(result.stddev),
+              loss: parseFloat(result.packetLoss),
+              result: 'pass'
+            }
+            this.metrics.handleICMPTestResult(mapped)
+            return mapped
+          } else {
+            const mapped: IICMPTestResult = {
+              source: this.me,
+              host,
+              duration: hrend[1] / 1000000,
+              avg: 0,
+              stddev: 0,
+              loss: parseFloat(result.packetLoss),
+              result: 'fail'
+            }
+            this.metrics.handleICMPTestResult(mapped)
+            return mapped
+          }
+        } catch (ex) {
+          this.logger.error(`icmp test for ${host} failed`, ex)
+          const hrend = process.hrtime(hrstart)
+          const mapped: IICMPTestResult = {
+            source: this.me,
+            host,
+            duration: hrend[1] / 1000000,
+            avg: 0,
+            stddev: 0,
+            loss: 100.0,
+            result: 'fail'
+          }
+          this.metrics.handleICMPTestResult(mapped)
+          return mapped
+        }
+      }
+    )
+    const result = await Promise.allSettled(promises)
+    return result
+      .filter((r) => r.status === 'fulfilled')
+      .map((i) => (i as PromiseFulfilledResult<IICMPTestResult>).value)
   }
 
   public async runDNSTests(): Promise<IDNSTestResult[]> {
@@ -224,5 +324,59 @@ export default class Tester implements ITester {
     return result
       .filter((r) => r.status === 'fulfilled')
       .map((i) => (i as PromiseFulfilledResult<ITCPTestResult>).value)
+  }
+
+  public async runCustomHTTPTests(): Promise<ICustomHTTPTestResult[]> {
+    const promises = this.config.testConfig.custom_http.hosts.map(
+      async (host): Promise<ICustomHTTPTestResult> => {
+        try {
+          const url = `http://${host}`
+          const result = await this.got(url, {
+            timeout: this.config.testConfig.custom_http.timeout
+          })
+          const htmlReponseCodes = [200, 301, 302, 304, 401]
+          if (htmlReponseCodes.includes(result.statusCode)) {
+            const mappedResult: ICustomHTTPTestResult = {
+              source: this.me,
+              destination: host,
+              timings: result.timings,
+              result: 'pass'
+            }
+            this.metrics.handleCustomHTTPTestResult(mappedResult)
+            return mappedResult
+          } else {
+            const mappedResult: ICustomHTTPTestResult = {
+              source: this.me,
+              destination: host,
+              timings: result.timings,
+              result: 'fail'
+            }
+            this.metrics.handleCustomHTTPTestResult(mappedResult)
+            return mappedResult
+          }
+        } catch (ex) {
+          this.logger.warn(
+            `test failed`,
+            {
+              source: this.me,
+              destination: host
+            },
+            ex
+          )
+          const failResult: ICustomHTTPTestResult = {
+            source: this.me,
+            destination: host,
+            result: 'fail'
+          }
+          this.metrics.handleCustomHTTPTestResult(failResult)
+          return failResult
+        }
+      }
+    )
+
+    const result = await Promise.allSettled(promises)
+    return result
+      .filter((r) => r.status === 'fulfilled')
+      .map((i) => (i as PromiseFulfilledResult<ICustomHTTPTestResult>).value)
   }
 }
