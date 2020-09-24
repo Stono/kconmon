@@ -46,5 +46,7 @@ resources:
     memory: 45Mi
 
 prometheus:
-  # If you wish to create a service and a service monitor because you're using the prometheus operator, change this to true
+  # If you wish to create a service and a service monitor because you're using the prometheus operator, change this to true and set valid match label 
   enableServiceMonitor: false
+  prometheusMatchLabels:
+    prometheus: "prometheus-kconmon"
