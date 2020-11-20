@@ -5,7 +5,7 @@ metadata:
   labels:
 {{ include "kconmon.app.labels.standard" . | indent 4 }}
   name: kconmon-service-monitor
-  namespace: kconmon
+  namespace: {{ .Release.Namespace }}
 spec:
   endpoints:
   - interval: 5s
